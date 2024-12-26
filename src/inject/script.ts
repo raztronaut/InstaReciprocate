@@ -356,6 +356,24 @@ class InstagramAnalytics {
       .forEach(username => {
         userList.appendChild(this.createUserItem(username));
       });
+
+    const reAnalyzeButton = document.getElementById('reAnalyzeButton');
+    if (reAnalyzeButton) {
+      reAnalyzeButton.onmouseover = () => {
+        reAnalyzeButton.style.transform = 'translateY(-2px)';
+        reAnalyzeButton.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.2)';
+      };
+      reAnalyzeButton.onmouseout = () => {
+        reAnalyzeButton.style.transform = 'translateY(0)';
+        reAnalyzeButton.style.boxShadow = 'none';
+      };
+      reAnalyzeButton.onclick = () => {
+        if (this.results) {
+          this.results.innerHTML = '';
+        }
+        this.analyze();
+      };
+    }
   }
 
   private async initService() {
@@ -819,8 +837,27 @@ class InstagramAnalytics {
               ${this.createSearchInput()}
               <div id="userList" style="max-height: 400px; overflow-y: auto; background: white; border-radius: 12px; padding: 8px;"></div>
             </div>
-            <div style="margin-top: 16px; text-align: right; color: #8e8e8e; font-size: 12px;">
-              Last analyzed: ${this.lastAnalyzed?.toLocaleString()}
+            <div style="margin-top: 16px; display: flex; justify-content: space-between; align-items: center;">
+              <button id="reAnalyzeButton" style="
+                background: linear-gradient(45deg, #405DE6, #5B51D8, #833AB4, #C13584, #E1306C, #FD1D1D);
+                background-size: 400% 400%;
+                animation: gradient 15s ease infinite;
+                color: white;
+                border: none;
+                padding: 12px 20px;
+                border-radius: 14px;
+                font-weight: 600;
+                font-size: 14px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                position: relative;
+                overflow: hidden;
+              ">
+                Re-analyze
+              </button>
+              <div style="color: #8e8e8e; font-size: 12px;">
+                Last analyzed: ${this.lastAnalyzed?.toLocaleString()}
+              </div>
             </div>
           </div>
         `;
@@ -860,11 +897,9 @@ class InstagramAnalytics {
       }
     } finally {
       this.isAnalyzing = false;
-      if (this.startButton) {
-        this.startButton.disabled = false;
-        this.startButton.style.opacity = '1';
-        this.startButton.style.cursor = 'pointer';
-        this.startButton.innerHTML = 'Start Analysis';
+      if (this.startButton && this.startButton.parentElement) {
+        this.startButton.parentElement.removeChild(this.startButton);
+        this.startButton = null;  // Clear the reference
       }
       if (this.progress) {
         this.progress.style.display = 'none';
