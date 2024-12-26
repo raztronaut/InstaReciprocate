@@ -86,20 +86,20 @@ class InstaReciprocate {
     const leftSection = document.createElement('div');
     leftSection.style.cssText = 'display: flex; align-items: center; flex-grow: 1;';
 
-    // Add checkbox for selection (only in non-followers tab)
-    if (this.activeTab === 'non-followers') {
+    // Add checkbox for selection (in non-followers and whitelist tabs)
+    if (this.activeTab === 'non-followers' || this.activeTab === 'whitelist') {
       const checkbox = document.createElement('div');
       checkbox.style.cssText = `
         width: 20px;
         height: 20px;
-        border-radius: 4px;
+        border-radius: 50%;
         margin-right: 12px;
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
         transition: all 0.2s ease;
-        border: 2px solid ${this.selectedUsers.has(username) ? '#3b82f6' : '#d1d5db'};
+        border: 1.5px solid ${this.selectedUsers.has(username) ? '#3b82f6' : '#d1d5db'};
         background-color: ${this.selectedUsers.has(username) ? '#3b82f6' : 'transparent'};
       `;
       
@@ -115,8 +115,8 @@ class InstaReciprocate {
 
       if (this.selectedUsers.has(username)) {
         checkbox.innerHTML = `
-          <svg class="w-3 h-3" viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2">
-            <path d="M2 6l3 3 5-5" />
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.5">
+            <path d="M2.5 6l2.5 2.5 4.5-4.5" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         `;
       }
@@ -209,9 +209,7 @@ class InstaReciprocate {
         this.updateResults();
       };
     } else if (this.activeTab === 'whitelist') {
-      actionButton.textContent = 'Protected';
-      actionButton.style.color = '#16a34a';
-      actionButton.style.borderColor = '#16a34a';
+      // Don't create action button for whitelist tab
     } else {
       actionButton.textContent = 'Following';
       actionButton.style.color = '#262626';
@@ -246,7 +244,71 @@ class InstaReciprocate {
     }
 
     item.appendChild(leftSection);
-    item.appendChild(actionButton);
+
+    // Create button container for action and whitelist buttons
+    const buttonContainer = document.createElement('div');
+    buttonContainer.style.cssText = `
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    `;
+
+    // Only add action button if not in whitelist tab
+    if (this.activeTab !== 'whitelist') {
+      buttonContainer.appendChild(actionButton);
+    }
+
+    // Create whitelist button only if not in unfollowed or whitelist tab
+    if (this.activeTab !== 'unfollowed' && this.activeTab !== 'whitelist') {
+      // Create whitelist button
+      const whitelistButton = document.createElement('button');
+      whitelistButton.style.cssText = `
+        background: none;
+        border: 1px solid ${this.whitelistedUsers.has(username) ? '#16a34a' : '#dbdbdb'};
+        padding: 7px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      `;
+
+      const heartHandsIcon = document.createElement('img');
+      heartHandsIcon.src = chrome.runtime.getURL('icons/HeartHandsEmoji.png');
+      heartHandsIcon.alt = 'Whitelist';
+      heartHandsIcon.style.cssText = `
+        width: 20px;
+        height: 20px;
+        object-fit: contain;
+      `;
+
+      whitelistButton.appendChild(heartHandsIcon);
+      
+      whitelistButton.onclick = (e) => {
+        e.stopPropagation();
+        this.toggleWhitelist(username);
+        whitelistButton.style.borderColor = this.whitelistedUsers.has(username) ? '#16a34a' : '#dbdbdb';
+      };
+
+      whitelistButton.onmouseover = () => {
+        if (!this.whitelistedUsers.has(username)) {
+          whitelistButton.style.borderColor = '#16a34a';
+          whitelistButton.style.backgroundColor = '#f0fdf4';
+        }
+      };
+
+      whitelistButton.onmouseout = () => {
+        if (!this.whitelistedUsers.has(username)) {
+          whitelistButton.style.borderColor = '#dbdbdb';
+          whitelistButton.style.backgroundColor = 'transparent';
+        }
+      };
+
+      buttonContainer.appendChild(whitelistButton);
+    }
+
+    item.appendChild(buttonContainer);
 
     return item;
   }
@@ -255,25 +317,83 @@ class InstaReciprocate {
     const tabsContainer = document.createElement('div');
     tabsContainer.style.cssText = `
       display: flex;
-      gap: 8px;
+      align-items: center;
+      border-bottom: 1px solid #dbdbdb;
       margin-bottom: 16px;
+      gap: 40px;
+      position: relative;
     `;
 
     const createTab = (text: string, count: number, type: 'non-followers' | 'whitelist' | 'unfollowed') => {
       const tab = document.createElement('button');
+      const isActive = this.activeTab === type;
+      
       tab.style.cssText = `
-        padding: 8px 16px;
-        border-radius: 8px;
+        padding: 16px 0;
         font-size: 14px;
-        font-weight: 500;
+        font-weight: 600;
         cursor: pointer;
         border: none;
-        transition: all 0.2s ease;
-        ${this.activeTab === type 
-          ? 'background: #0095f6; color: white;' 
-          : 'background: #f3f4f6; color: #6b7280;'}
+        background: none;
+        color: ${isActive ? '#262626' : '#8e8e8e'};
+        position: relative;
+        transition: color 0.2s ease;
+        letter-spacing: 0.2px;
+        text-transform: uppercase;
       `;
-      tab.textContent = `${text} (${count})`;
+
+      // Create the tab content with count
+      const tabContent = document.createElement('div');
+      tabContent.style.cssText = `
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      `;
+      
+      const tabText = document.createElement('span');
+      tabText.textContent = text;
+      
+      const countBadge = document.createElement('span');
+      countBadge.textContent = count.toLocaleString();
+      countBadge.style.cssText = `
+        font-weight: normal;
+        color: ${isActive ? '#262626' : '#8e8e8e'};
+      `;
+
+      tabContent.appendChild(tabText);
+      tabContent.appendChild(countBadge);
+      tab.appendChild(tabContent);
+
+      // Create and add the underline indicator for active tab
+      if (isActive) {
+        const indicator = document.createElement('div');
+        indicator.style.cssText = `
+          position: absolute;
+          bottom: -1px;
+          left: 0;
+          width: 100%;
+          height: 1px;
+          background-color: #262626;
+          transition: all 0.2s ease;
+        `;
+        tab.appendChild(indicator);
+      }
+
+      // Add hover effects
+      tab.onmouseover = () => {
+        if (!isActive) {
+          tab.style.color = '#262626';
+          countBadge.style.color = '#262626';
+        }
+      };
+
+      tab.onmouseout = () => {
+        if (!isActive) {
+          tab.style.color = '#8e8e8e';
+          countBadge.style.color = '#8e8e8e';
+        }
+      };
+
       tab.onclick = () => this.switchTab(type);
       return tab;
     };
@@ -282,7 +402,7 @@ class InstaReciprocate {
       !this.whitelistedUsers.has(user) && !this.unfollowedUsers.has(user)
     ).length;
 
-    tabsContainer.appendChild(createTab('Users Not Following Back', nonFollowersCount, 'non-followers'));
+    tabsContainer.appendChild(createTab('Not Following Back', nonFollowersCount, 'non-followers'));
     tabsContainer.appendChild(createTab('Whitelist', this.whitelistedUsers.size, 'whitelist'));
     tabsContainer.appendChild(createTab('Unfollowed', this.unfollowedUsers.size, 'unfollowed'));
 
@@ -291,7 +411,17 @@ class InstaReciprocate {
 
   private switchTab(tab: 'non-followers' | 'whitelist' | 'unfollowed'): void {
     this.activeTab = tab;
+    this.selectedUsers.clear(); // Clear selected users when switching tabs
     this.updateResults();
+
+    // Add smooth scroll to top of results
+    const userList = document.getElementById('userList');
+    if (userList) {
+      userList.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    }
   }
 
   private updateResults(): void {
@@ -352,7 +482,7 @@ class InstaReciprocate {
     }
 
     // Handle action buttons for non-followers tab
-    if (this.activeTab === 'non-followers') {
+    if (this.activeTab === 'non-followers' || this.activeTab === 'whitelist') {
       let actionButtonsContainer = document.querySelector('.action-buttons-container');
       if (!actionButtonsContainer) {
         actionButtonsContainer = document.createElement('div');
@@ -872,7 +1002,15 @@ class InstaReciprocate {
       if (this.results) {
         this.results.innerHTML = `
           <div style="background: #f3f4f6; border-radius: 16px; padding: 24px;">
-            <div style="font-size: 18px; font-weight: 600; color: #262626; margin-bottom: 20px;">Results</div>
+            <div style="font-size: 18px; font-weight: 600; color: #262626; margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+              Results
+              <img 
+                src="${chrome.runtime.getURL('icons/sparkles.png')}" 
+                alt="✨" 
+                style="width: 20px; height: 20px; object-fit: contain;"
+                onerror="this.onerror=null; this.innerHTML='✨'; console.error('Failed to load sparkles icon');"
+              >
+            </div>
             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 28px;">
               <div style="background: white; padding: 24px; border-radius: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); border: 1px solid rgba(0, 0, 0, 0.05); display: flex; flex-direction: column; justify-content: center; min-height: 140px;">
                 <div style="color: #8e8e8e; font-size: 14px;">Following</div>
@@ -1073,6 +1211,7 @@ class InstaReciprocate {
           completed++;
           updateProgress();
           this.selectedUsers.delete(username);
+          this.unfollowedUsers.add(username);
           this.updateResults();
         }
       }
@@ -1120,18 +1259,23 @@ class InstaReciprocate {
     };
 
     selectAllButton.onclick = () => {
-      const nonWhitelistedUsers = this.allUsers.filter(user => 
-        !this.whitelistedUsers.has(user) && !this.unfollowedUsers.has(user)
-      );
+      let relevantUsers: string[];
+      if (this.activeTab === 'whitelist') {
+        relevantUsers = this.allUsers.filter(user => this.whitelistedUsers.has(user));
+      } else {
+        relevantUsers = this.allUsers.filter(user => 
+          !this.whitelistedUsers.has(user) && !this.unfollowedUsers.has(user)
+        );
+      }
       
-      if (this.selectedUsers.size === nonWhitelistedUsers.length) {
+      if (this.selectedUsers.size === relevantUsers.length) {
         this.selectedUsers.clear();
         selectAllButton.textContent = 'Select All';
         selectAllButton.style.backgroundColor = 'transparent';
         selectAllButton.style.borderColor = '#dbdbdb';
         selectAllButton.style.color = '#262626';
       } else {
-        this.selectedUsers = new Set(nonWhitelistedUsers);
+        this.selectedUsers = new Set(relevantUsers);
         selectAllButton.textContent = 'Deselect All';
         selectAllButton.style.backgroundColor = '#f3f4f6';
         selectAllButton.style.borderColor = '#d1d5db';
@@ -1140,41 +1284,142 @@ class InstaReciprocate {
       this.updateResults();
     };
 
-    const unfollowButton = document.createElement('button');
-    unfollowButton.style.cssText = `
-      padding: 7px 16px;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      background: #0095f6;
-      border: none;
-      color: white;
-      opacity: ${this.selectedUsers.size === 0 ? '0.5' : '1'};
-      cursor: ${this.selectedUsers.size === 0 ? 'not-allowed' : 'pointer'};
-    `;
-    unfollowButton.textContent = 'Unfollow Selected';
-    unfollowButton.disabled = this.selectedUsers.size === 0;
-    
-    unfollowButton.onmouseover = () => {
-      if (!unfollowButton.disabled) {
-        unfollowButton.style.backgroundColor = '#1aa1f7';
-      }
-    };
-    
-    unfollowButton.onmouseout = () => {
-      unfollowButton.style.backgroundColor = '#0095f6';
-    };
-    
-    unfollowButton.onclick = () => {
-      if (!unfollowButton.disabled) {
-        this.unfollowSelected();
-      }
-    };
-
     container.appendChild(selectAllButton);
-    container.appendChild(unfollowButton);
+
+    if (this.activeTab === 'non-followers') {
+      // Add whitelist and unfollow buttons for non-followers tab
+      const whitelistButton = document.createElement('button');
+      whitelistButton.style.cssText = `
+        padding: 7px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        background: #16a34a;
+        border: none;
+        color: white;
+        opacity: ${this.selectedUsers.size === 0 ? '0.5' : '1'};
+        cursor: ${this.selectedUsers.size === 0 ? 'not-allowed' : 'pointer'};
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      `;
+
+      const heartHandsIcon = document.createElement('img');
+      heartHandsIcon.src = chrome.runtime.getURL('icons/HeartHandsEmoji.png');
+      heartHandsIcon.alt = 'Whitelist';
+      heartHandsIcon.style.cssText = `
+        width: 16px;
+        height: 16px;
+        object-fit: contain;
+      `;
+
+      const buttonText = document.createElement('span');
+      buttonText.textContent = 'Whitelist Selected';
+
+      whitelistButton.appendChild(heartHandsIcon);
+      whitelistButton.appendChild(buttonText);
+      whitelistButton.disabled = this.selectedUsers.size === 0;
+      
+      whitelistButton.onmouseover = () => {
+        if (!whitelistButton.disabled) {
+          whitelistButton.style.backgroundColor = '#15803d';
+        }
+      };
+      
+      whitelistButton.onmouseout = () => {
+        whitelistButton.style.backgroundColor = '#16a34a';
+      };
+      
+      whitelistButton.onclick = () => {
+        if (!whitelistButton.disabled) {
+          for (const username of this.selectedUsers) {
+            this.whitelistedUsers.add(username);
+          }
+          this.saveWhitelistedUsers();
+          this.selectedUsers.clear();
+          this.updateResults();
+        }
+      };
+
+      const unfollowButton = document.createElement('button');
+      unfollowButton.style.cssText = `
+        padding: 7px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        background: #0095f6;
+        border: none;
+        color: white;
+        opacity: ${this.selectedUsers.size === 0 ? '0.5' : '1'};
+        cursor: ${this.selectedUsers.size === 0 ? 'not-allowed' : 'pointer'};
+      `;
+      unfollowButton.textContent = 'Unfollow Selected';
+      unfollowButton.disabled = this.selectedUsers.size === 0;
+      
+      unfollowButton.onmouseover = () => {
+        if (!unfollowButton.disabled) {
+          unfollowButton.style.backgroundColor = '#1aa1f7';
+        }
+      };
+      
+      unfollowButton.onmouseout = () => {
+        unfollowButton.style.backgroundColor = '#0095f6';
+      };
+      
+      unfollowButton.onclick = () => {
+        if (!unfollowButton.disabled) {
+          this.unfollowSelected();
+        }
+      };
+
+      container.appendChild(whitelistButton);
+      container.appendChild(unfollowButton);
+    } else if (this.activeTab === 'whitelist') {
+      // Add remove from whitelist button
+      const removeButton = document.createElement('button');
+      removeButton.style.cssText = `
+        padding: 7px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        background: #ef4444;
+        border: none;
+        color: white;
+        opacity: ${this.selectedUsers.size === 0 ? '0.5' : '1'};
+        cursor: ${this.selectedUsers.size === 0 ? 'not-allowed' : 'pointer'};
+      `;
+      removeButton.textContent = 'Remove from Whitelist';
+      removeButton.disabled = this.selectedUsers.size === 0;
+      
+      removeButton.onmouseover = () => {
+        if (!removeButton.disabled) {
+          removeButton.style.backgroundColor = '#dc2626';
+        }
+      };
+      
+      removeButton.onmouseout = () => {
+        removeButton.style.backgroundColor = '#ef4444';
+      };
+      
+      removeButton.onclick = () => {
+        if (!removeButton.disabled) {
+          for (const username of this.selectedUsers) {
+            this.whitelistedUsers.delete(username);
+          }
+          this.saveWhitelistedUsers();
+          this.selectedUsers.clear();
+          this.updateResults();
+        }
+      };
+
+      container.appendChild(removeButton);
+    }
 
     return container;
   }
