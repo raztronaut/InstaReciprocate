@@ -12,9 +12,10 @@ class InstagramAnalytics {
   private service: any = null;
   private whitelistedUsers: Set<string>;
   private selectedUsers: Set<string> = new Set();
-  private activeTab: 'non-followers' | 'whitelist' = 'non-followers';
-  private userMap: Map<string, { id: string; username: string; }> = new Map();
+  private activeTab: 'non-followers' | 'whitelist' | 'unfollowed' = 'non-followers';
+  private userMap: Map<string, { id: string; username: string; fullName?: string; }> = new Map();
   private allUsers: string[] = [];
+  private unfollowedUsers: Set<string> = new Set();
 
   constructor() {
     this.whitelistedUsers = this.loadWhitelistedUsers();
@@ -73,15 +74,15 @@ class InstagramAnalytics {
       margin: 4px 0;
       transition: all 0.2s ease;
       cursor: pointer;
-      background-color: ${this.whitelistedUsers.has(username) ? '#f0fdf4' : 'transparent'};
-      border: 1px solid ${this.whitelistedUsers.has(username) ? '#86efac' : '#e5e7eb'};
+      background-color: transparent;
+      border: 1px solid #e5e7eb;
     `;
 
     const leftSection = document.createElement('div');
     leftSection.style.cssText = 'display: flex; align-items: center; flex-grow: 1;';
 
-    // Add checkbox for selection
-    if (!this.whitelistedUsers.has(username) && this.activeTab === 'non-followers') {
+    // Add checkbox for selection (only in non-followers tab)
+    if (this.activeTab === 'non-followers') {
       const checkbox = document.createElement('div');
       checkbox.style.cssText = `
         width: 20px;
@@ -121,8 +122,8 @@ class InstagramAnalytics {
     // Create profile image container
     const imgContainer = document.createElement('div');
     imgContainer.style.cssText = `
-      width: 40px;
-      height: 40px;
+      width: 44px;
+      height: 44px;
       border-radius: 50%;
       margin-right: 12px;
       background-color: #f3f4f6;
@@ -146,97 +147,96 @@ class InstagramAnalytics {
     imgContainer.appendChild(img);
     leftSection.appendChild(imgContainer);
 
-    // Create username container
-    const usernameContainer = document.createElement('div');
-    usernameContainer.style.cssText = 'flex-grow: 1; min-width: 0;';
+    // Create username and full name container
+    const userInfoContainer = document.createElement('div');
+    userInfoContainer.style.cssText = 'flex-grow: 1; min-width: 0;';
     
     const usernameText = document.createElement('div');
     usernameText.style.cssText = 'font-weight: 600; color: #262626; overflow: hidden; text-overflow: ellipsis;';
-    usernameText.textContent = `@${username}`;
+    usernameText.textContent = username;
+
+    const fullNameText = document.createElement('div');
+    fullNameText.style.cssText = 'color: #737373; font-size: 14px; overflow: hidden; text-overflow: ellipsis;';
+    const userData = this.userMap.get(username);
+    fullNameText.textContent = userData?.fullName || '';
     
-    usernameContainer.appendChild(usernameText);
-    leftSection.appendChild(usernameContainer);
+    userInfoContainer.appendChild(usernameText);
+    userInfoContainer.appendChild(fullNameText);
+    leftSection.appendChild(userInfoContainer);
 
-    // Create action buttons container
-    const actionsContainer = document.createElement('div');
-    actionsContainer.style.cssText = 'display: flex; gap: 8px; align-items: center; flex-shrink: 0;';
-
-    // Create whitelist button
-    const whitelistButton = document.createElement('button');
-    whitelistButton.style.cssText = `
-      background: ${this.whitelistedUsers.has(username) ? '#dcfce7' : '#f3f4f6'};
-      color: ${this.whitelistedUsers.has(username) ? '#16a34a' : '#6b7280'};
-      border: none;
-      padding: 8px 12px;
-      border-radius: 6px;
+    // Create action button
+    const actionButton = document.createElement('button');
+    actionButton.style.cssText = `
+      background: none;
+      border: 1px solid #dbdbdb;
+      padding: 7px 16px;
+      border-radius: 8px;
       font-size: 14px;
+      font-weight: 600;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 4px;
       transition: all 0.2s ease;
       white-space: nowrap;
     `;
-    whitelistButton.innerHTML = `
-      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 16px; height: 16px;">
-        <path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5l6.74-6.76z" />
-        <line x1="16" y1="8" x2="2" y2="22" />
-        <line x1="17.5" y1="15" x2="9" y2="15" />
-      </svg>
-      <span>${this.whitelistedUsers.has(username) ? 'Protected' : 'Protect'}</span>
-    `;
 
-    whitelistButton.onmouseover = () => {
-      whitelistButton.style.backgroundColor = this.whitelistedUsers.has(username) ? '#bbf7d0' : '#e5e7eb';
-    };
-
-    whitelistButton.onmouseout = () => {
-      whitelistButton.style.backgroundColor = this.whitelistedUsers.has(username) ? '#dcfce7' : '#f3f4f6';
-    };
-
-    whitelistButton.onclick = (e) => {
-      e.stopPropagation();
-      this.toggleWhitelist(username);
-    };
-
-    // Create copy button
-    const copyButton = document.createElement('button');
-    copyButton.style.cssText = `
-      background: none;
-      border: none;
-      padding: 8px;
-      color: #0095f6;
-      cursor: pointer;
-      font-size: 14px;
-      border-radius: 4px;
-      transition: all 0.2s ease;
-      flex-shrink: 0;
-    `;
-    copyButton.textContent = 'Copy';
-
-    copyButton.addEventListener('mouseover', () => {
-      copyButton.style.backgroundColor = '#f3f4f6';
-    });
-
-    copyButton.addEventListener('mouseout', () => {
-      copyButton.style.backgroundColor = 'transparent';
-    });
-
-    copyButton.addEventListener('click', (e) => {
-      e.stopPropagation();
-      navigator.clipboard.writeText(username);
-      const originalText = copyButton.textContent;
-      copyButton.textContent = 'Copied!';
-      setTimeout(() => {
-        copyButton.textContent = originalText;
-      }, 2000);
-    });
-
-    actionsContainer.appendChild(whitelistButton);
-    actionsContainer.appendChild(copyButton);
+    if (this.activeTab === 'unfollowed') {
+      actionButton.textContent = 'Follow';
+      actionButton.style.color = 'white';
+      actionButton.style.background = '#0095f6';
+      actionButton.style.border = 'none';
+      
+      actionButton.onmouseover = () => {
+        actionButton.style.background = '#1aa1f7';
+      };
+      
+      actionButton.onmouseout = () => {
+        actionButton.style.background = '#0095f6';
+      };
+      
+      actionButton.onclick = async (e) => {
+        e.stopPropagation();
+        // TODO: Implement follow functionality
+        this.unfollowedUsers.delete(username);
+        this.updateResults();
+      };
+    } else if (this.activeTab === 'whitelist') {
+      actionButton.textContent = 'Protected';
+      actionButton.style.color = '#16a34a';
+      actionButton.style.borderColor = '#16a34a';
+    } else {
+      actionButton.textContent = 'Following';
+      actionButton.style.color = '#262626';
+      
+      actionButton.onmouseover = () => {
+        actionButton.textContent = 'Unfollow';
+        actionButton.style.borderColor = '#ef4444';
+        actionButton.style.color = '#ef4444';
+      };
+      
+      actionButton.onmouseout = () => {
+        actionButton.textContent = 'Following';
+        actionButton.style.borderColor = '#dbdbdb';
+        actionButton.style.color = '#262626';
+      };
+      
+      actionButton.onclick = async (e) => {
+        e.stopPropagation();
+        const userData = this.userMap.get(username);
+        if (userData) {
+          actionButton.disabled = true;
+          actionButton.style.opacity = '0.5';
+          const success = await this.unfollowUser(userData.id);
+          if (success) {
+            this.unfollowedUsers.add(username);
+            this.updateResults();
+          }
+          actionButton.disabled = false;
+          actionButton.style.opacity = '1';
+        }
+      };
+    }
 
     item.appendChild(leftSection);
-    item.appendChild(actionsContainer);
+    item.appendChild(actionButton);
 
     return item;
   }
@@ -249,7 +249,7 @@ class InstagramAnalytics {
       margin-bottom: 16px;
     `;
 
-    const createTab = (text: string, count: number, type: 'non-followers' | 'whitelist') => {
+    const createTab = (text: string, count: number, type: 'non-followers' | 'whitelist' | 'unfollowed') => {
       const tab = document.createElement('button');
       tab.style.cssText = `
         padding: 8px 16px;
@@ -269,16 +269,17 @@ class InstagramAnalytics {
     };
 
     const nonFollowersCount = this.allUsers.filter(user => 
-      !this.whitelistedUsers.has(user)
+      !this.whitelistedUsers.has(user) && !this.unfollowedUsers.has(user)
     ).length;
 
     tabsContainer.appendChild(createTab('Users Not Following Back', nonFollowersCount, 'non-followers'));
     tabsContainer.appendChild(createTab('Whitelist', this.whitelistedUsers.size, 'whitelist'));
+    tabsContainer.appendChild(createTab('Unfollowed', this.unfollowedUsers.size, 'unfollowed'));
 
     return tabsContainer;
   }
 
-  private switchTab(tab: 'non-followers' | 'whitelist'): void {
+  private switchTab(tab: 'non-followers' | 'whitelist' | 'unfollowed'): void {
     this.activeTab = tab;
     this.updateResults();
   }
@@ -296,13 +297,20 @@ class InstagramAnalytics {
     userList.innerHTML = '';
 
     // Get users based on active tab
-    const usersToShow = this.activeTab === 'whitelist'
-      ? this.allUsers.filter(user => this.whitelistedUsers.has(user))
-      : this.allUsers.filter(user => !this.whitelistedUsers.has(user));
+    let usersToShow: string[];
+    if (this.activeTab === 'whitelist') {
+      usersToShow = this.allUsers.filter(user => this.whitelistedUsers.has(user));
+    } else if (this.activeTab === 'unfollowed') {
+      usersToShow = Array.from(this.unfollowedUsers);
+    } else {
+      usersToShow = this.allUsers.filter(user => 
+        !this.whitelistedUsers.has(user) && 
+        !this.unfollowedUsers.has(user)
+      );
+    }
 
     // Handle action buttons for non-followers tab
     if (this.activeTab === 'non-followers') {
-      // Look for existing action buttons container
       let actionButtonsContainer = document.querySelector('.action-buttons-container');
       if (!actionButtonsContainer) {
         actionButtonsContainer = document.createElement('div');
@@ -311,8 +319,13 @@ class InstagramAnalytics {
           userList.parentElement.insertBefore(actionButtonsContainer, userList);
         }
       }
-      actionButtonsContainer.innerHTML = ''; // Clear existing buttons
+      actionButtonsContainer.innerHTML = '';
       actionButtonsContainer.appendChild(this.createActionButtons());
+    } else {
+      const actionButtonsContainer = document.querySelector('.action-buttons-container');
+      if (actionButtonsContainer?.parentElement) {
+        actionButtonsContainer.parentElement.removeChild(actionButtonsContainer);
+      }
     }
 
     // Update tabs
