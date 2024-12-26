@@ -1,4 +1,4 @@
-class InstagramAnalytics {
+class InstaReciprocate {
   private container: HTMLDivElement | null = null;
   private startButton: HTMLButtonElement | null = null;
   private progress: HTMLDivElement | null = null;
@@ -571,23 +571,30 @@ class InstagramAnalytics {
     titleContainer.style.cssText = `
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 8px;
     `;
 
-    const icon = document.createElement('div');
-    icon.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-      <path d="M12 2C14.717 2 15.056 2.01 16.122 2.06C17.187 2.11 17.912 2.277 18.55 2.525C19.21 2.779 19.766 3.123 20.322 3.678C20.8305 4.1779 21.224 4.78259 21.475 5.45C21.722 6.087 21.89 6.813 21.94 7.878C21.987 8.944 22 9.283 22 12C22 14.717 21.99 15.056 21.94 16.122C21.89 17.187 21.722 17.912 21.475 18.55C21.2247 19.2178 20.8311 19.8226 20.322 20.322C19.822 20.8303 19.2173 21.2238 18.55 21.475C17.913 21.722 17.187 21.89 16.122 21.94C15.056 21.987 14.717 22 12 22C9.283 22 8.944 21.99 7.878 21.94C6.813 21.89 6.088 21.722 5.45 21.475C4.78233 21.2245 4.17753 20.8309 3.678 20.322C3.16941 19.8222 2.77593 19.2175 2.525 18.55C2.277 17.913 2.11 17.187 2.06 16.122C2.013 15.056 2 14.717 2 12C2 9.283 2.01 8.944 2.06 7.878C2.11 6.812 2.277 6.088 2.525 5.45C2.77524 4.78218 3.1688 4.17732 3.678 3.678C4.17767 3.16923 4.78243 2.77573 5.45 2.525C6.088 2.277 6.812 2.11 7.878 2.06C8.944 2.013 9.283 2 12 2Z" stroke="#262626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      <path d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z" stroke="#262626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>`;
+    const icon = document.createElement('img');
+    icon.src = chrome.runtime.getURL('icons/logo.jpg');
+    icon.alt = 'InstaReciprocate Logo';
+    icon.style.cssText = `
+      width: 24px;
+      height: 24px;
+      object-fit: contain;
+    `;
 
-    const title = document.createElement('h2');
+    const title = document.createElement('h1');
     title.textContent = 'InstaReciprocate';
     title.style.cssText = `
       font-size: 20px;
       font-weight: 600;
       margin: 0;
       color: #262626;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     `;
+    title.prepend(icon);
 
     titleContainer.appendChild(icon);
     titleContainer.appendChild(title);
@@ -1183,7 +1190,7 @@ class InstagramAnalytics {
 }
 
 // Create and initialize
-const app = new InstagramAnalytics();
+const app = new InstaReciprocate();
 app.init();
 
-export default InstagramAnalytics; 
+export default InstaReciprocate; 

@@ -22,7 +22,7 @@ module.exports = {
     filename: 'insta-reciprocate.js',
     path: path.resolve(__dirname, 'dist-extension'),
     library: {
-      name: 'InstagramAnalytics',
+      name: 'InstaReciprocate',
       type: 'var',
       export: 'default',
     },

@@ -6,6 +6,7 @@
     "build:inject": "webpack"
   },
   "devDependencies": {
+    "@types/chrome": "^0.0.287",
     "@types/node": "^20",
     "ts-loader": "^9.5.1",
     "typescript": "^5",
