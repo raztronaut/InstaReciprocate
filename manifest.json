@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "description": "Analyze your Instagram following and followers with advanced insights. Safe, private, and feature-rich Instagram relationship analyzer.",
   "author": "InstaReciprocate",
-  "homepage_url": "https://github.com/yourusername/instagram-analytics",
+  "homepage_url": "https://github.com/raztronaut/InstaReciprocate",
   "permissions": [
     "activeTab",
     "scripting",
