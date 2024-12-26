@@ -300,6 +300,38 @@ class InstagramAnalytics {
     const userList = document.getElementById('userList');
     if (!userList) return;
 
+    // Add custom scrollbar styles
+    userList.style.cssText = `
+      max-height: 400px; 
+      overflow-y: auto; 
+      background: white; 
+      border-radius: 12px; 
+      padding: 8px;
+      scrollbar-width: thin;
+      scrollbar-color: #d1d5db transparent;
+    `;
+
+    // Add webkit scrollbar styles
+    const style = document.createElement('style');
+    style.textContent = `
+      #userList::-webkit-scrollbar {
+        width: 8px;
+      }
+      #userList::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      #userList::-webkit-scrollbar-thumb {
+        background-color: #d1d5db;
+        border-radius: 20px;
+        border: 2px solid transparent;
+        background-clip: content-box;
+      }
+      #userList::-webkit-scrollbar-thumb:hover {
+        background-color: #9ca3af;
+      }
+    `;
+    document.head.appendChild(style);
+
     // Store current search term
     const searchTerm = this.searchInput?.value.toLowerCase() || '';
 
@@ -818,18 +850,20 @@ class InstagramAnalytics {
           <div style="background: #f3f4f6; border-radius: 16px; padding: 24px;">
             <div style="font-size: 18px; font-weight: 600; color: #262626; margin-bottom: 20px;">Results</div>
             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 28px;">
-              <div style="background: white; padding: 20px; border-radius: 12px; text-align: center; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);">
-                <div style="color: #8e8e8e; font-size: 14px; margin-bottom: 8px;">Following</div>
-                <div style="font-size: 28px; font-weight: 600; color: #262626;">${this.formatNumber(following.size)}</div>
+              <div style="background: white; padding: 24px; border-radius: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); border: 1px solid rgba(0, 0, 0, 0.05); display: flex; flex-direction: column; justify-content: space-between; min-height: 140px;">
+                <div style="color: #8e8e8e; font-size: 14px;">Following</div>
+                <div style="font-size: 32px; font-weight: 600; color: #262626;">${this.formatNumber(following.size)}</div>
+                <div style="visibility: hidden;"><!-- Spacer --></div>
               </div>
-              <div style="background: white; padding: 20px; border-radius: 12px; text-align: center; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);">
-                <div style="color: #8e8e8e; font-size: 14px; margin-bottom: 8px;">Followers</div>
-                <div style="font-size: 28px; font-weight: 600; color: #262626;">${this.formatNumber(followers.size)}</div>
+              <div style="background: white; padding: 24px; border-radius: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); border: 1px solid rgba(0, 0, 0, 0.05); display: flex; flex-direction: column; justify-content: space-between; min-height: 140px;">
+                <div style="color: #8e8e8e; font-size: 14px;">Followers</div>
+                <div style="font-size: 32px; font-weight: 600; color: #262626;">${this.formatNumber(followers.size)}</div>
+                <div style="visibility: hidden;"><!-- Spacer --></div>
               </div>
-              <div style="background: white; padding: 20px; border-radius: 12px; text-align: center; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);">
-                <div style="color: #8e8e8e; font-size: 14px; margin-bottom: 8px;">Not Following Back</div>
-                <div style="font-size: 28px; font-weight: 600; color: #262626;">${this.formatNumber(nonFollowersCount)}</div>
-                <div style="color: #8e8e8e; font-size: 12px; margin-top: 4px;">${nonFollowersPercentage}% of following</div>
+              <div style="background: white; padding: 24px; border-radius: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); border: 1px solid rgba(0, 0, 0, 0.05); display: flex; flex-direction: column; justify-content: space-between; min-height: 140px;">
+                <div style="color: #8e8e8e; font-size: 14px;">Not Following Back</div>
+                <div style="font-size: 32px; font-weight: 600; color: #262626;">${this.formatNumber(nonFollowersCount)}</div>
+                <div style="color: #8e8e8e; font-size: 12px;">${nonFollowersPercentage}% of following</div>
               </div>
             </div>
             <div style="margin-top: 28px;">
