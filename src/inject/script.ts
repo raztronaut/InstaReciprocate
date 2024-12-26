@@ -13,7 +13,12 @@ class InstagramAnalytics {
   private whitelistedUsers: Set<string>;
   private selectedUsers: Set<string> = new Set();
   private activeTab: 'non-followers' | 'whitelist' | 'unfollowed' = 'non-followers';
-  private userMap: Map<string, { id: string; username: string; fullName?: string; }> = new Map();
+  private userMap: Map<string, {
+    id: string;
+    username: string;
+    fullName: string;
+    profilePicUrl: string;
+  }> = new Map();
   private allUsers: string[] = [];
   private unfollowedUsers: Set<string> = new Set();
 
@@ -139,7 +144,8 @@ class InstagramAnalytics {
       object-fit: cover;
     `;
     img.alt = `@${username}`;
-    img.src = `https://i.instagram.com/api/v1/users/web_profile_info/?username=${username}`;
+    const userData = this.userMap.get(username);
+    img.src = userData?.profilePicUrl || 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
     img.onerror = () => {
       img.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
     };
@@ -152,16 +158,20 @@ class InstagramAnalytics {
     userInfoContainer.style.cssText = 'flex-grow: 1; min-width: 0;';
     
     const usernameText = document.createElement('div');
-    usernameText.style.cssText = 'font-weight: 600; color: #262626; overflow: hidden; text-overflow: ellipsis;';
+    usernameText.style.cssText = 'font-weight: 600; color: #262626; overflow: hidden; text-overflow: ellipsis; font-size: 14px;';
     usernameText.textContent = username;
 
     const fullNameText = document.createElement('div');
-    fullNameText.style.cssText = 'color: #737373; font-size: 14px; overflow: hidden; text-overflow: ellipsis;';
-    const userData = this.userMap.get(username);
-    fullNameText.textContent = userData?.fullName || '';
+    fullNameText.style.cssText = 'color: #737373; font-size: 14px; overflow: hidden; text-overflow: ellipsis; margin-top: 1px;';
+    if (userData?.fullName) {
+      fullNameText.textContent = userData.fullName;
+      userInfoContainer.appendChild(usernameText);
+      userInfoContainer.appendChild(fullNameText);
+    } else {
+      usernameText.style.marginTop = '4px';
+      userInfoContainer.appendChild(usernameText);
+    }
     
-    userInfoContainer.appendChild(usernameText);
-    userInfoContainer.appendChild(fullNameText);
     leftSection.appendChild(userInfoContainer);
 
     // Create action button
@@ -713,7 +723,12 @@ class InstagramAnalytics {
           const response = await this.service.getFollowing(userId, afterFollowing);
           response.users.forEach((user: any) => {
             following.add(user.username);
-            this.userMap.set(user.username, { id: user.id, username: user.username });
+            this.userMap.set(user.username, {
+              id: user.id,
+              username: user.username,
+              fullName: user.full_name || '',
+              profilePicUrl: user.profile_pic_url || ''
+            });
           });
           hasNextFollowing = response.pageInfo.has_next_page;
           afterFollowing = response.pageInfo.end_cursor;
@@ -743,7 +758,18 @@ class InstagramAnalytics {
         try {
           await new Promise(resolve => setTimeout(resolve, 2000));
           const response = await this.service.getFollowers(userId, afterFollowers);
-          response.users.forEach((u: any) => followers.add(u.username));
+          response.users.forEach((user: any) => {
+            followers.add(user.username);
+            // Update user data if we don't have it yet
+            if (!this.userMap.has(user.username)) {
+              this.userMap.set(user.username, {
+                id: user.id,
+                username: user.username,
+                fullName: user.full_name || '',
+                profilePicUrl: user.profile_pic_url || ''
+              });
+            }
+          });
           hasNextFollowers = response.pageInfo.has_next_page;
           afterFollowers = response.pageInfo.end_cursor;
           
@@ -969,36 +995,92 @@ class InstagramAnalytics {
 
   private createActionButtons(): HTMLDivElement {
     const container = document.createElement('div');
-    container.className = 'flex items-center gap-4 mb-4';
+    container.style.cssText = `
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 16px 0;
+      padding: 12px;
+      background: white;
+      border-radius: 8px;
+      border: 1px solid #dbdbdb;
+    `;
 
     const selectAllButton = document.createElement('button');
-    selectAllButton.className = `
-      px-4 py-2 rounded-md text-sm font-medium transition-all
-      bg-blue-50 text-blue-600 hover:bg-blue-100
+    selectAllButton.style.cssText = `
+      padding: 7px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: none;
+      border: 1px solid #dbdbdb;
+      color: #262626;
     `;
     selectAllButton.textContent = 'Select All';
+    
+    selectAllButton.onmouseover = () => {
+      selectAllButton.style.backgroundColor = '#f3f4f6';
+    };
+    
+    selectAllButton.onmouseout = () => {
+      selectAllButton.style.backgroundColor = 'transparent';
+    };
+
     selectAllButton.onclick = () => {
-      const nonWhitelistedUsers = this.allUsers.filter(user => !this.whitelistedUsers.has(user));
+      const nonWhitelistedUsers = this.allUsers.filter(user => 
+        !this.whitelistedUsers.has(user) && !this.unfollowedUsers.has(user)
+      );
+      
       if (this.selectedUsers.size === nonWhitelistedUsers.length) {
         this.selectedUsers.clear();
         selectAllButton.textContent = 'Select All';
-        selectAllButton.className = 'px-4 py-2 rounded-md text-sm font-medium transition-all bg-blue-50 text-blue-600 hover:bg-blue-100';
+        selectAllButton.style.backgroundColor = 'transparent';
+        selectAllButton.style.borderColor = '#dbdbdb';
+        selectAllButton.style.color = '#262626';
       } else {
         this.selectedUsers = new Set(nonWhitelistedUsers);
         selectAllButton.textContent = 'Deselect All';
-        selectAllButton.className = 'px-4 py-2 rounded-md text-sm font-medium transition-all bg-gray-100 text-gray-600 hover:bg-gray-200';
+        selectAllButton.style.backgroundColor = '#f3f4f6';
+        selectAllButton.style.borderColor = '#d1d5db';
+        selectAllButton.style.color = '#262626';
       }
       this.updateResults();
     };
 
     const unfollowButton = document.createElement('button');
-    unfollowButton.className = `
-      px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-md 
-      hover:bg-red-600 transition-colors
-      disabled:opacity-50 disabled:cursor-not-allowed
+    unfollowButton.style.cssText = `
+      padding: 7px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: #0095f6;
+      border: none;
+      color: white;
+      opacity: ${this.selectedUsers.size === 0 ? '0.5' : '1'};
+      cursor: ${this.selectedUsers.size === 0 ? 'not-allowed' : 'pointer'};
     `;
     unfollowButton.textContent = 'Unfollow Selected';
-    unfollowButton.onclick = () => this.unfollowSelected();
+    unfollowButton.disabled = this.selectedUsers.size === 0;
+    
+    unfollowButton.onmouseover = () => {
+      if (!unfollowButton.disabled) {
+        unfollowButton.style.backgroundColor = '#1aa1f7';
+      }
+    };
+    
+    unfollowButton.onmouseout = () => {
+      unfollowButton.style.backgroundColor = '#0095f6';
+    };
+    
+    unfollowButton.onclick = () => {
+      if (!unfollowButton.disabled) {
+        this.unfollowSelected();
+      }
+    };
 
     container.appendChild(selectAllButton);
     container.appendChild(unfollowButton);
