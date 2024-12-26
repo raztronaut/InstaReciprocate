@@ -5,7 +5,7 @@ import './globals.css';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Instagram Analytics Tool',
+  title: 'InstaReciprocate',
   description: 'Analyze your Instagram following and followers with advanced insights',
 };
 

@@ -19,8 +19,8 @@ module.exports = {
     },
   },
   output: {
-    filename: 'instagram-analytics.js',
-    path: path.resolve(__dirname, './'),
+    filename: 'insta-reciprocate.js',
+    path: path.resolve(__dirname, 'dist-extension'),
     library: {
       name: 'InstagramAnalytics',
       type: 'var',

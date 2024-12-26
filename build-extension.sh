@@ -9,7 +9,6 @@ npm run build:inject
 # Copy files to extension directory
 cp manifest.json dist-extension/
 cp background.js dist-extension/
-cp instagram-analytics.js dist-extension/
 
 # Note: You'll need to add icon files to the icons directory
 echo "Extension files prepared in dist-extension/"

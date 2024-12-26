@@ -16,3 +16,12 @@
 
 ### Dependencies
 - Added `sonner` for toast notifications 
+
+## 2024-03-19
+- Renamed app from "Instagram Analytics" to "InstaReciprocate"
+  - Updated manifest.json
+  - Updated package.json
+  - Updated storage keys
+  - Updated DOM element IDs
+  - Updated build configuration files
+  - Updated script references 

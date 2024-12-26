@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Instagram Analytics",
+  "name": "InstaReciprocate",
   "version": "1.0.0",
   "description": "Analyze your Instagram following and followers with advanced insights",
   "permissions": [
@@ -11,7 +11,7 @@
     "https://www.instagram.com/*"
   ],
   "action": {
-    "default_title": "Instagram Analytics"
+    "default_title": "InstaReciprocate"
   },
   "background": {
     "service_worker": "background.js"

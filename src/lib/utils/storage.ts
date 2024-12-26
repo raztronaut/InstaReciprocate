@@ -1,8 +1,8 @@
 // Storage keys
-export const WHITELISTED_USERS_KEY = 'instagram-analytics-whitelisted-users';
-export const LAST_ANALYSIS_KEY = 'instagram-analytics-last-analysis';
-export const FOLLOWING_KEY = 'instagram-analytics-following';
-export const FOLLOWERS_KEY = 'instagram-analytics-followers';
+export const WHITELISTED_USERS_KEY = 'insta-reciprocate-whitelisted-users';
+export const LAST_ANALYSIS_KEY = 'insta-reciprocate-last-analysis';
+export const FOLLOWING_KEY = 'insta-reciprocate-following';
+export const FOLLOWERS_KEY = 'insta-reciprocate-followers';
 
 export const loadWhitelistedUsers = (): Set<string> => {
   try {

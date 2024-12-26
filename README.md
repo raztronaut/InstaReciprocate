@@ -1,4 +1,4 @@
-# Instagram Analytics Tool
+# InstaReciprocate
 
 A powerful tool to analyze your Instagram following/followers relationships with advanced insights and safety features.
 

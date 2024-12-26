@@ -506,7 +506,7 @@ class InstagramAnalytics {
 
     // Create container
     this.container = document.createElement('div');
-    this.container.id = 'instagram-analytics-root';
+    this.container.id = 'insta-reciprocate-root';
     this.container.style.cssText = `
       position: fixed;
       top: 50%;
@@ -529,19 +529,19 @@ class InstagramAnalytics {
     // Add webkit scrollbar styles for the main container
     const style = document.createElement('style');
     style.textContent = `
-      #instagram-analytics-root::-webkit-scrollbar {
+      #insta-reciprocate-root::-webkit-scrollbar {
         width: 8px;
       }
-      #instagram-analytics-root::-webkit-scrollbar-track {
+      #insta-reciprocate-root::-webkit-scrollbar-track {
         background: transparent;
       }
-      #instagram-analytics-root::-webkit-scrollbar-thumb {
+      #insta-reciprocate-root::-webkit-scrollbar-thumb {
         background-color: #d1d5db;
         border-radius: 20px;
         border: 2px solid transparent;
         background-clip: content-box;
       }
-      #instagram-analytics-root::-webkit-scrollbar-thumb:hover {
+      #insta-reciprocate-root::-webkit-scrollbar-thumb:hover {
         background-color: #9ca3af;
       }
       @keyframes gradient {
@@ -581,7 +581,7 @@ class InstagramAnalytics {
     </svg>`;
 
     const title = document.createElement('h2');
-    title.textContent = 'Instagram Analytics';
+    title.textContent = 'InstaReciprocate';
     title.style.cssText = `
       font-size: 20px;
       font-weight: 600;
@@ -1177,7 +1177,7 @@ class InstagramAnalytics {
       this.createUI();
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
-      console.error('Failed to inject Instagram Analytics:', errorMessage);
+      console.error('Failed to inject InstaReciprocate:', errorMessage);
     }
   }
 }
