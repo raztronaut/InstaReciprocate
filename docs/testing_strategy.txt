@@ -1,0 +1,117 @@
+# Testing Strategy with Instagram Test Account
+
+## Initial Testing Phase (During Week 1-2)
+1. Authentication & Basic Setup
+   - Test cookie-based authentication
+   - Verify hostname checks
+   - Test basic session handling
+   ```typescript
+   // Test cookie retrieval
+   const ds_user_id = getCookie('ds_user_id');
+   const csrftoken = getCookie('csrftoken');
+   ```
+
+2. Single API Call Testing
+   - Test individual GraphQL endpoint calls
+   - Verify data structure
+   - Test with small data sets
+   ```typescript
+   // Test single API call without pagination
+   const initialUrl = urlGenerator();
+   const singleResponse = await fetch(initialUrl);
+   ```
+
+## Safe Testing Approach (Week 2-3)
+
+### 1. Conservative Rate Limits for Testing
+```typescript
+// Suggested testing constants
+const TEST_TIME_BETWEEN_SEARCH_CYCLES = 2000; // 2 seconds
+const TEST_TIME_AFTER_FIVE_SEARCH_CYCLES = 30000; // 30 seconds
+const TEST_TIME_BETWEEN_UNFOLLOWS = 8000; // 8 seconds
+const TEST_TIME_AFTER_FIVE_UNFOLLOWS = 600000; // 10 minutes
+```
+
+### 2. Small Scale Testing
+- Start with small batches (10-20 follows)
+- Test with known accounts first
+- Use longer delays between actions
+- Monitor for any warning signs
+
+### 3. Progressive Testing
+1. First Week:
+   - Only test data fetching
+   - No unfollow actions
+   - Maximum 50 API calls per day
+
+2. Second Week:
+   - Test full scanning
+   - Limited to 100 accounts
+   - No unfollow actions
+
+3. Third Week:
+   - Test unfollow functionality
+   - Maximum 5 unfollows per day
+   - Large gaps between testing sessions
+
+## Safety Guidelines
+
+### 1. Test Account Setup
+- Age the account (at least 1-2 weeks old)
+- Have some organic activity first
+- Follow 100-200 accounts naturally
+- Have some genuine interactions
+
+### 2. Testing Precautions
+- Never test during Instagram's high-traffic hours
+- Space out testing sessions (4-6 hours apart)
+- Keep logs of all actions and responses
+- Monitor for any warning messages
+- Stop immediately if any blocks occur
+
+### 3. Monitoring Points
+```typescript
+// Add these monitoring points in your code
+const monitorResponse = (response: any) => {
+  if (response.status !== 200) {
+    console.warn('Potential rate limit warning');
+    // Add longer delay
+    await sleep(30000);
+  }
+};
+```
+
+## Integration Points in Project Plan
+
+### Phase 2: Data Fetching & Processing
+- Add test mode flag
+```typescript
+const TEST_MODE = true;
+const timings = TEST_MODE ? TEST_TIMINGS : PRODUCTION_TIMINGS;
+```
+
+### Phase 5: Safety & Error Handling
+- Add additional safety checks
+- Implement gradual ramp-up
+- Add test account detection
+
+## Testing Schedule
+1. Week 1-2: Basic API calls and data fetching
+2. Week 2-3: Full scanning with conservative limits
+3. Week 3-4: Limited unfollow testing
+4. Week 4-5: Full feature testing with safety limits
+5. Week 5-6: Production testing with normal limits
+
+## Emergency Stops
+```typescript
+// Add emergency stop functionality
+let emergencyStop = false;
+
+const checkSafety = async () => {
+  if (emergencyStop || warningDetected) {
+    await pauseAllOperations();
+    await logTestingSession();
+    return false;
+  }
+  return true;
+}; 
