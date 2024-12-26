@@ -522,7 +522,38 @@ class InstagramAnalytics {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       overflow-y: auto;
       border: 1px solid rgba(0, 0, 0, 0.1);
+      scrollbar-width: thin;
+      scrollbar-color: #d1d5db transparent;
     `;
+
+    // Add webkit scrollbar styles for the main container
+    const style = document.createElement('style');
+    style.textContent = `
+      #instagram-analytics-root::-webkit-scrollbar {
+        width: 8px;
+      }
+      #instagram-analytics-root::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      #instagram-analytics-root::-webkit-scrollbar-thumb {
+        background-color: #d1d5db;
+        border-radius: 20px;
+        border: 2px solid transparent;
+        background-clip: content-box;
+      }
+      #instagram-analytics-root::-webkit-scrollbar-thumb:hover {
+        background-color: #9ca3af;
+      }
+      @keyframes gradient {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+      }
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+    `;
+    document.head.appendChild(style);
 
     // Create header with close button
     const header = document.createElement('div');
@@ -615,20 +646,6 @@ class InstagramAnalytics {
       position: relative;
       overflow: hidden;
     `;
-
-    // Add keyframes for gradient animation
-    const style = document.createElement('style');
-    style.textContent = `
-      @keyframes gradient {
-        0% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
-      }
-      @keyframes spin {
-        to { transform: rotate(360deg); }
-      }
-    `;
-    document.head.appendChild(style);
 
     this.startButton.onmouseover = () => {
       this.startButton!.style.transform = 'translateY(-2px)';
@@ -850,19 +867,17 @@ class InstagramAnalytics {
           <div style="background: #f3f4f6; border-radius: 16px; padding: 24px;">
             <div style="font-size: 18px; font-weight: 600; color: #262626; margin-bottom: 20px;">Results</div>
             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 28px;">
-              <div style="background: white; padding: 24px; border-radius: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); border: 1px solid rgba(0, 0, 0, 0.05); display: flex; flex-direction: column; justify-content: space-between; min-height: 140px;">
+              <div style="background: white; padding: 24px; border-radius: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); border: 1px solid rgba(0, 0, 0, 0.05); display: flex; flex-direction: column; justify-content: center; min-height: 140px;">
                 <div style="color: #8e8e8e; font-size: 14px;">Following</div>
-                <div style="font-size: 32px; font-weight: 600; color: #262626;">${this.formatNumber(following.size)}</div>
-                <div style="visibility: hidden;"><!-- Spacer --></div>
+                <div style="font-size: 32px; font-weight: 600; color: #262626; margin: 12px 0;">${this.formatNumber(following.size)}</div>
               </div>
-              <div style="background: white; padding: 24px; border-radius: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); border: 1px solid rgba(0, 0, 0, 0.05); display: flex; flex-direction: column; justify-content: space-between; min-height: 140px;">
+              <div style="background: white; padding: 24px; border-radius: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); border: 1px solid rgba(0, 0, 0, 0.05); display: flex; flex-direction: column; justify-content: center; min-height: 140px;">
                 <div style="color: #8e8e8e; font-size: 14px;">Followers</div>
-                <div style="font-size: 32px; font-weight: 600; color: #262626;">${this.formatNumber(followers.size)}</div>
-                <div style="visibility: hidden;"><!-- Spacer --></div>
+                <div style="font-size: 32px; font-weight: 600; color: #262626; margin: 12px 0;">${this.formatNumber(followers.size)}</div>
               </div>
-              <div style="background: white; padding: 24px; border-radius: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); border: 1px solid rgba(0, 0, 0, 0.05); display: flex; flex-direction: column; justify-content: space-between; min-height: 140px;">
+              <div style="background: white; padding: 24px; border-radius: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); border: 1px solid rgba(0, 0, 0, 0.05); display: flex; flex-direction: column; justify-content: center; min-height: 140px;">
                 <div style="color: #8e8e8e; font-size: 14px;">Not Following Back</div>
-                <div style="font-size: 32px; font-weight: 600; color: #262626;">${this.formatNumber(nonFollowersCount)}</div>
+                <div style="font-size: 32px; font-weight: 600; color: #262626; margin: 12px 0;">${this.formatNumber(nonFollowersCount)}</div>
                 <div style="color: #8e8e8e; font-size: 12px;">${nonFollowersPercentage}% of following</div>
               </div>
             </div>
