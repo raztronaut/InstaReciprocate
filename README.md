@@ -1,4 +1,4 @@
-# InstaReciprocate
+# <img src="icons/logo.png" alt="InstaReciprocate Logo" width="32" height="32" style="vertical-align: middle"> InstaReciprocate
 
 A powerful tool to analyze your Instagram following/followers relationships with advanced insights and safety features.
 
