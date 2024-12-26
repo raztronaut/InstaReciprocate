@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "Instagram Analytics",
+  "version": "1.0.0",
+  "description": "Analyze your Instagram following and followers with advanced insights",
+  "permissions": [
+    "activeTab",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://www.instagram.com/*"
+  ],
+  "action": {
+    "default_title": "Instagram Analytics"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+} 

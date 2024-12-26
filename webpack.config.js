@@ -20,7 +20,7 @@ module.exports = {
   },
   output: {
     filename: 'instagram-analytics.js',
-    path: path.resolve(__dirname, 'dist'),
+    path: path.resolve(__dirname, './'),
     library: {
       name: 'InstagramAnalytics',
       type: 'var',
