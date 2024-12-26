@@ -2,10 +2,13 @@
   "manifest_version": 3,
   "name": "InstaReciprocate",
   "version": "1.0.0",
-  "description": "Analyze your Instagram following and followers with advanced insights",
+  "description": "Analyze your Instagram following and followers with advanced insights. Safe, private, and feature-rich Instagram relationship analyzer.",
+  "author": "InstaReciprocate",
+  "homepage_url": "https://github.com/yourusername/instagram-analytics",
   "permissions": [
     "activeTab",
-    "scripting"
+    "scripting",
+    "storage"
   ],
   "host_permissions": [
     "https://www.instagram.com/*"
@@ -24,5 +27,8 @@
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
-  }
+  },
+  "minimum_chrome_version": "88",
+  "offline_enabled": true,
+  "short_name": "InstaReciprocate"
 } 
