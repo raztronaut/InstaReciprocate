@@ -82,8 +82,6 @@ To ensure safe usage of Instagram's API:
 ### Prerequisites
 - Node.js 18+
 
-- Node.js 18+ installed
-
 ### Local Development
 
 1. Clone the repository:
