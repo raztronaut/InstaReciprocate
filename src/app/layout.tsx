@@ -1,13 +1,8 @@
-import type { Metadata } from 'next';
+import React from 'react';
 import { Inter } from 'next/font/google';
 import './globals.css';
 
 const inter = Inter({ subsets: ['latin'] });
-
-export const metadata: Metadata = {
-  title: 'InstaReciprocate',
-  description: 'Analyze your Instagram following and followers with advanced insights',
-};
 
 export default function RootLayout({
   children,
