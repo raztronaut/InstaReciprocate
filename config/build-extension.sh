@@ -45,7 +45,7 @@ fi
 
 # Copy static assets
 log "Copying static assets..."
-cp "$SRC_DIR/manifest.json" "$DIST_DIR/" || error "Failed to copy manifest.json"
+cp "manifest.json" "$DIST_DIR/" || error "Failed to copy manifest.json"
 cp -r "$SRC_DIR/assets" "$DIST_DIR/" || error "Failed to copy assets"
 
 # Verify build
@@ -55,6 +55,14 @@ fi
 
 if [ ! -f "$DIST_DIR/background.js" ]; then
     error "Build verification failed: background.js not found"
+fi
+
+if [ ! -d "$DIST_DIR/assets/icons" ]; then
+    error "Build verification failed: icons directory not found"
+fi
+
+if [ ! -f "$DIST_DIR/manifest.json" ]; then
+    error "Build verification failed: manifest.json not found"
 fi
 
 # Create build info
