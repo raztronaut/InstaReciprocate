@@ -23,13 +23,21 @@
 - Responsive and modern UI
 
 ## Privacy & Security
+- Zero external storage: All data stays in your browser
+- Local whitelist: Saved only in your browser's localStorage
+- No tracking: Zero usage monitoring
+- Fresh sessions: Data cleared on extension close
+- Rate limiting: Safe API usage with automatic pausing
 
-We take a radical approach to privacy:
-- Zero external storage: We don't store anything on servers
-- Local whitelist: Your whitelisted users are saved in your browser's localStorage only
-- No tracking: We don't monitor or analyze your usage
-- Fresh sessions: All data is cleared when you close the extension
-- For complete details, see our [Privacy Policy](docs/PRIVACY.md)
+## Project Structure
+```
+src/
+├── assets/         # Extension assets
+├── background/     # Extension initialization
+├── inject/         # Core functionality
+│   └── script.ts   # Main application logic
+└── manifest.json   # Extension manifest
+```
 
 ## Required Permissions
 
@@ -72,6 +80,7 @@ To ensure safe usage of Instagram's API:
 ## For Developers
 
 ### Prerequisites
+- Node.js 18+
 
 - Node.js 18+ installed
 
