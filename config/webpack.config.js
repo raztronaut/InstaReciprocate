@@ -2,8 +2,8 @@ const path = require('path');
 
 module.exports = {
   entry: {
-    content: path.resolve(__dirname, '../src/inject/script.ts'),
-    background: path.resolve(__dirname, '../src/background/background.js')
+    content: './src/inject/script.ts',
+    background: './src/background/background.js'
   },
   mode: 'production',
   module: {
