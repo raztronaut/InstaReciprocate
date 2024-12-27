@@ -29,7 +29,7 @@ We take a radical approach to privacy:
 - Local whitelist: Your whitelisted users are saved in your browser's localStorage only
 - No tracking: We don't monitor or analyze your usage
 - Fresh sessions: All data is cleared when you close the extension
-- For complete details, see our [Privacy Policy](PRIVACY.md)
+- For complete details, see our [Privacy Policy](docs/PRIVACY.md)
 
 ## Required Permissions
 
@@ -109,9 +109,9 @@ npm run build:inject
 
 ## Documentation
 
-- [Privacy Policy](PRIVACY.md)
-- [Terms of Service](TERMS.md)
-- [Changelog](CHANGELOG.md)
+- [Privacy Policy](docs/PRIVACY.md)
+- [Terms of Service](docs/TERMS.md)
+- [Changelog](docs/CHANGELOG.md)
 
 ## License
 
