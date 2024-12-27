@@ -4,6 +4,8 @@ class InstaReciprocate {
   private progress: HTMLDivElement | null = null;
   private results: HTMLDivElement | null = null;
   private searchInput: HTMLInputElement | null = null;
+  private searchQuery: string = '';
+  private searchDebounceTimeout: number | null = null;
   private isAnalyzing: boolean = false;
   private isUnfollowing: boolean = false;
   private unfollowCount: number = 0;
@@ -29,6 +31,22 @@ class InstaReciprocate {
       this.whitelistedUsers = new Set(event.detail.users);
       this.updateResults();
     }) as EventListener);
+
+    // Add cleanup on window unload
+    window.addEventListener('unload', this.cleanup.bind(this));
+  }
+
+  private cleanup(): void {
+    // Clear any existing debounce timeout
+    if (this.searchDebounceTimeout !== null) {
+      window.clearTimeout(this.searchDebounceTimeout);
+      this.searchDebounceTimeout = null;
+    }
+
+    // Remove existing event listeners from search input
+    if (this.searchInput && document.contains(this.searchInput)) {
+      this.searchInput.removeEventListener('input', this.handleSearchInput.bind(this));
+    }
   }
 
   private loadWhitelistedUsers(): Set<string> {
@@ -424,6 +442,120 @@ class InstaReciprocate {
     }
   }
 
+  private getFilteredUsers(): string[] {
+    const query = this.searchQuery.toLowerCase().trim();
+    if (!query) return this.getActiveTabUsers();
+    
+    return this.getActiveTabUsers().filter(username => {
+      const user = this.userMap.get(username);
+      return username.toLowerCase().includes(query) ||
+             user?.fullName?.toLowerCase().includes(query);
+    });
+  }
+
+  private getActiveTabUsers(): string[] {
+    switch (this.activeTab) {
+      case 'whitelist':
+        return this.allUsers.filter(user => this.whitelistedUsers.has(user));
+      case 'unfollowed':
+        return Array.from(this.unfollowedUsers);
+      default: // 'non-followers'
+        return this.allUsers.filter(user => 
+          !this.whitelistedUsers.has(user) && 
+          !this.unfollowedUsers.has(user)
+        );
+    }
+  }
+
+  private createSearchInput(): string {
+    const searchContainer = document.createElement('div');
+    searchContainer.style.cssText = `
+      margin: 16px 0;
+      position: relative;
+      width: 100%;
+      display: flex;
+    `;
+
+    const searchIcon = document.createElement('div');
+    searchIcon.innerHTML = `
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); z-index: 1;">
+        <path d="M21 21L16.65 16.65M19 11C19 15.4183 15.4183 19 11 19C6.58172 19 3 15.4183 3 11C3 6.58172 6.58172 3 11 3C15.4183 3 19 6.58172 19 11Z" stroke="#8e8e8e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    `;
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.placeholder = 'Search users...';
+    input.value = this.searchQuery;
+    input.id = 'insta-reciprocate-search';
+    input.style.cssText = `
+      width: 100%;
+      padding: 12px 12px 12px 40px;
+      border: 1px solid #dbdbdb;
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+      transition: all 0.2s ease;
+      box-sizing: border-box;
+      color: #262626;
+    `;
+
+    // Add placeholder color styles
+    const style = document.createElement('style');
+    style.textContent = `
+      #insta-reciprocate-search::placeholder {
+        color: #8e8e8e;
+        opacity: 1;
+      }
+      #insta-reciprocate-search:-ms-input-placeholder {
+        color: #8e8e8e;
+      }
+      #insta-reciprocate-search::-ms-input-placeholder {
+        color: #8e8e8e;
+      }
+    `;
+    document.head.appendChild(style);
+
+    searchContainer.appendChild(searchIcon);
+    searchContainer.appendChild(input);
+
+    return searchContainer.outerHTML;
+  }
+
+  private initializeSearchInput(): void {
+    // Find the search input in the DOM
+    const input = document.getElementById('insta-reciprocate-search') as HTMLInputElement;
+    if (!input) return;
+
+    // Update the reference and attach event listeners
+    this.searchInput = input;
+    this.searchInput.addEventListener('input', this.handleSearchInput.bind(this));
+    
+    this.searchInput.onfocus = () => {
+      this.searchInput!.style.borderColor = '#0095f6';
+    };
+    this.searchInput.onblur = () => {
+      this.searchInput!.style.borderColor = '#dbdbdb';
+    };
+  }
+
+  private handleSearchInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.searchQuery = input.value;
+
+    // Clear existing timeout
+    if (this.searchDebounceTimeout !== null) {
+      window.clearTimeout(this.searchDebounceTimeout);
+      this.searchDebounceTimeout = null;
+    }
+
+    // Debounce the search update
+    this.searchDebounceTimeout = window.setTimeout(() => {
+      this.updateResults();
+      this.searchDebounceTimeout = null;
+    }, 300);
+  }
+
   private updateResults(): void {
     if (!this.results) return;
 
@@ -462,23 +594,32 @@ class InstaReciprocate {
     `;
     document.head.appendChild(style);
 
-    // Store current search term
-    const searchTerm = this.searchInput?.value.toLowerCase() || '';
-
     // Clear existing items
     userList.innerHTML = '';
 
-    // Get users based on active tab
-    let usersToShow: string[];
-    if (this.activeTab === 'whitelist') {
-      usersToShow = this.allUsers.filter(user => this.whitelistedUsers.has(user));
-    } else if (this.activeTab === 'unfollowed') {
-      usersToShow = Array.from(this.unfollowedUsers);
-    } else {
-      usersToShow = this.allUsers.filter(user => 
-        !this.whitelistedUsers.has(user) && 
-        !this.unfollowedUsers.has(user)
-      );
+    // Get filtered users based on search and active tab
+    const filteredUsers = this.getFilteredUsers();
+
+    // Update tabs
+    let tabsContainer = document.querySelector('.tabs-container');
+    if (!tabsContainer) {
+      tabsContainer = document.createElement('div');
+      tabsContainer.className = 'tabs-container';
+      if (userList.parentElement) {
+        userList.parentElement.insertBefore(tabsContainer, userList);
+      }
+    }
+    tabsContainer.innerHTML = '';
+    tabsContainer.appendChild(this.createTabs());
+
+    // Update search input
+    const searchContainer = document.getElementById('search-container');
+    if (searchContainer) {
+      // Only create new search input if it doesn't exist
+      if (!document.getElementById('insta-reciprocate-search')) {
+        searchContainer.innerHTML = this.createSearchInput();
+        this.initializeSearchInput();
+      }
     }
 
     // Handle action buttons for non-followers tab
@@ -500,42 +641,10 @@ class InstaReciprocate {
       }
     }
 
-    // Update tabs
-    let tabsContainer = document.querySelector('.tabs-container');
-    if (!tabsContainer) {
-      tabsContainer = document.createElement('div');
-      tabsContainer.className = 'tabs-container';
-      if (userList.parentElement) {
-        userList.parentElement.insertBefore(tabsContainer, userList);
-      }
-    }
-    tabsContainer.innerHTML = '';
-    tabsContainer.appendChild(this.createTabs());
-
-    // Filter and show users
-    usersToShow
-      .filter(username => username.toLowerCase().includes(searchTerm))
-      .forEach(username => {
-        userList.appendChild(this.createUserItem(username));
-      });
-
-    const reAnalyzeButton = document.getElementById('reAnalyzeButton');
-    if (reAnalyzeButton) {
-      reAnalyzeButton.onmouseover = () => {
-        reAnalyzeButton.style.transform = 'translateY(-2px)';
-        reAnalyzeButton.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.2)';
-      };
-      reAnalyzeButton.onmouseout = () => {
-        reAnalyzeButton.style.transform = 'translateY(0)';
-        reAnalyzeButton.style.boxShadow = 'none';
-      };
-      reAnalyzeButton.onclick = () => {
-        if (this.results) {
-          this.results.innerHTML = '';
-        }
-        this.analyze();
-      };
-    }
+    // Create and append user items
+    filteredUsers.forEach(username => {
+      userList.appendChild(this.createUserItem(username));
+    });
   }
 
   private async initService() {
@@ -757,6 +866,7 @@ class InstaReciprocate {
       closeButton.style.color = '#8e8e8e';
     };
     closeButton.onclick = () => {
+      this.cleanup();
       document.body.removeChild(backdrop);
       document.body.removeChild(this.container!);
     };
@@ -820,9 +930,10 @@ class InstaReciprocate {
     document.body.appendChild(backdrop);
     document.body.appendChild(this.container);
 
-    // Add keyboard shortcut for closing
+    // Add keyboard shortcut for closing with cleanup
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && this.container && document.body.contains(this.container)) {
+        this.cleanup();
         document.body.removeChild(backdrop);
         document.body.removeChild(this.container);
       }
@@ -856,50 +967,11 @@ class InstaReciprocate {
     return Math.round((part / total) * 100);
   }
 
-  private createSearchInput() {
-    const searchContainer = document.createElement('div');
-    searchContainer.style.cssText = `
-      margin: 16px 0;
-      position: relative;
-      width: 100%;
-      display: flex;
-    `;
-
-    const searchIcon = document.createElement('div');
-    searchIcon.innerHTML = `
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); z-index: 1;">
-        <path d="M21 21L16.65 16.65M19 11C19 15.4183 15.4183 19 11 19C6.58172 19 3 15.4183 3 11C3 6.58172 6.58172 3 11 3C15.4183 3 19 6.58172 19 11Z" stroke="#8e8e8e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    `;
-
-    this.searchInput = document.createElement('input');
-    this.searchInput.type = 'text';
-    this.searchInput.placeholder = 'Search users...';
-    this.searchInput.style.cssText = `
-      width: 100%;
-      padding: 12px 12px 12px 40px;
-      border: 1px solid #dbdbdb;
-      border-radius: 8px;
-      font-size: 14px;
-      outline: none;
-      transition: all 0.2s ease;
-      box-sizing: border-box;
-    `;
-    this.searchInput.onfocus = () => {
-      this.searchInput!.style.borderColor = '#0095f6';
-    };
-    this.searchInput.onblur = () => {
-      this.searchInput!.style.borderColor = '#dbdbdb';
-    };
-
-    searchContainer.appendChild(searchIcon);
-    searchContainer.appendChild(this.searchInput);
-
-    return searchContainer.outerHTML;
-  }
-
   private async analyze() {
     if (this.isAnalyzing || !this.startButton || !this.progress || !this.results) return;
+
+    // Clean up before starting new analysis
+    this.cleanup();
 
     this.isAnalyzing = true;
     this.startButton.disabled = true;
@@ -1028,7 +1100,7 @@ class InstaReciprocate {
             </div>
             <div style="margin-top: 28px;">
               <div class="tabs-container"></div>
-              ${this.createSearchInput()}
+              <div id="search-container"></div>
               <div id="userList" style="max-height: 400px; overflow-y: auto; background: white; border-radius: 12px; padding: 8px;"></div>
             </div>
             <div style="margin-top: 16px; display: flex; justify-content: space-between; align-items: center;">
@@ -1056,13 +1128,29 @@ class InstaReciprocate {
           </div>
         `;
 
+        // Reset search state when re-analyzing
+        this.searchQuery = '';
+        this.searchInput = null;
+
         this.updateResults();
 
-        // Add search functionality
-        if (this.searchInput) {
-          this.searchInput.addEventListener('input', () => {
-            this.updateResults();
-          });
+        // Add reanalyze button functionality
+        const reAnalyzeButton = document.getElementById('reAnalyzeButton');
+        if (reAnalyzeButton) {
+          reAnalyzeButton.onmouseover = () => {
+            reAnalyzeButton.style.transform = 'translateY(-2px)';
+            reAnalyzeButton.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.2)';
+          };
+          reAnalyzeButton.onmouseout = () => {
+            reAnalyzeButton.style.transform = 'translateY(0)';
+            reAnalyzeButton.style.boxShadow = 'none';
+          };
+          reAnalyzeButton.onclick = () => {
+            if (this.results) {
+              this.results.innerHTML = '';
+            }
+            this.analyze();
+          };
         }
       }
     } catch (error) {
@@ -1093,7 +1181,7 @@ class InstaReciprocate {
       this.isAnalyzing = false;
       if (this.startButton && this.startButton.parentElement) {
         this.startButton.parentElement.removeChild(this.startButton);
-        this.startButton = null;  // Clear the reference
+        this.startButton = null;
       }
       if (this.progress) {
         this.progress.style.display = 'none';

@@ -25,3 +25,6 @@
   - Updated DOM element IDs
   - Updated build configuration files
   - Updated script references 
+
+## [2024-03-27]
+- Created feature branch `feature/improve-search-functionality` to enhance search capabilities within the extension 
