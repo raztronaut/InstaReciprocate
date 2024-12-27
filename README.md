@@ -1,4 +1,4 @@
-<p align="center"><img width="128" alt="InstaReciprocate Logo" src="icons/icon128.png"></p>
+<p align="center"><img width="128" alt="InstaReciprocate Logo" src="src/assets/icons/icon128.png"></p>
 
 <h2 align="center">InstaReciprocate</h2>
 <br/>

@@ -275,7 +275,7 @@ class InstaReciprocate {
       `;
 
       const heartHandsIcon = document.createElement('img');
-      heartHandsIcon.src = chrome.runtime.getURL('icons/HeartHandsEmoji.png');
+      heartHandsIcon.src = chrome.runtime.getURL('assets/icons/HeartHandsEmoji.png');
       heartHandsIcon.alt = 'Whitelist';
       heartHandsIcon.style.cssText = `
         width: 20px;
@@ -705,7 +705,7 @@ class InstaReciprocate {
     `;
 
     const icon = document.createElement('img');
-    icon.src = chrome.runtime.getURL('icons/logo.jpg');
+    icon.src = chrome.runtime.getURL('assets/icons/logo.jpg');
     icon.alt = 'InstaReciprocate Logo';
     icon.style.cssText = `
       width: 24px;
@@ -1005,7 +1005,7 @@ class InstaReciprocate {
             <div style="font-size: 18px; font-weight: 600; color: #262626; margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
               Results
               <img 
-                src="${chrome.runtime.getURL('icons/sparkles.png')}" 
+                src="${chrome.runtime.getURL('assets/icons/sparkles.png')}" 
                 alt="✨" 
                 style="width: 20px; height: 20px; object-fit: contain;"
                 onerror="this.onerror=null; this.innerHTML='✨'; console.error('Failed to load sparkles icon');"
@@ -1307,7 +1307,7 @@ class InstaReciprocate {
       `;
 
       const heartHandsIcon = document.createElement('img');
-      heartHandsIcon.src = chrome.runtime.getURL('icons/HeartHandsEmoji.png');
+      heartHandsIcon.src = chrome.runtime.getURL('assets/icons/HeartHandsEmoji.png');
       heartHandsIcon.alt = 'Whitelist';
       heartHandsIcon.style.cssText = `
         width: 16px;
