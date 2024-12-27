@@ -2,7 +2,14 @@
 
 All notable changes to InstaReciprocate will be documented in this file.
 
-## [0.9.0] - 2023-12-27
+## [0.9.1] - 2024-12-27
+
+### Enhanced
+- Improved whitelisted users persistence in local storage
+- Optimized whitelist loading and initialization
+- Better error handling for whitelist operations 
+
+## [0.9.0] - 2023-12-26
 
 Initial beta release for testing and Chrome Web Store review.
 
