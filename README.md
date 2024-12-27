@@ -1,4 +1,4 @@
-<p align="center"><img width="250" alt="InstaReciprocate Logo" src="icons/icon128.png"></p>
+<p align="center"><img width="128" alt="InstaReciprocate Logo" src="icons/icon128.png"></p>
 
 <h2 align="center">InstaReciprocate</h2>
 <br/>
@@ -19,7 +19,6 @@
 - Safe and rate-limited Instagram data fetching
 - Analysis of non-mutual follows
 - Whitelist system to protect important follows
-- Real-time progress tracking
 - Search and filtering capabilities
 - Responsive and modern UI
 
@@ -29,7 +28,7 @@ We take a radical approach to privacy:
 - Zero external storage: We don't store anything on servers
 - Local whitelist: Your whitelisted users are saved in your browser's localStorage only
 - No tracking: We don't monitor or analyze your usage
-- Fresh sessions: All analysis data is cleared when you close the extension
+- Fresh sessions: All data is cleared when you close the extension
 - For complete details, see our [Privacy Policy](PRIVACY.md)
 
 ## Usage
@@ -49,30 +48,29 @@ We take a radical approach to privacy:
 - Intelligent rate limiting with random delays
 - Automatic pause on rate limit detection
 - Progress tracking and resumable operations
-- Whitelist system for protecting important follows
+- Whitelist system for protecting important accounts
 
 ### Rate Limits
-To ensure safe and responsible usage of Instagram's API:
-- Random delays between requests (1-3 seconds)
-- Maximum 200 requests per hour
-- Automatic 1-hour cooldown if rate limit is reached
-- Smart retry mechanism with exponential backoff
-- Visual indicators for rate limit status
-- Automatic session pause when approaching limits
+To ensure safe usage of Instagram's API:
+- Random delays between actions (1-3 seconds)
+- Maximum 200 actions per hour
+- Automatic cooldown if rate limit is reached
+- Smart retry mechanism
+- Visual progress indicators
+- Automatic pause when approaching limits
 
 ## For Developers
 
 ### Prerequisites
 
 - Node.js 18+ installed
-- Instagram account cookies (ds_user_id and csrftoken)
 
 ### Local Development
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
-cd instagram-analytics
+git clone https://github.com/raztronaut/instareciprocate.git
+cd instareciprocate
 ```
 
 2. Install dependencies:
@@ -80,10 +78,16 @@ cd instagram-analytics
 npm install
 ```
 
-3. Start the development server:
+3. Build the extension:
 ```bash
-npm run dev
+npm run build:inject
 ```
+
+4. Load the extension in Chrome:
+   - Open Chrome and go to `chrome://extensions`
+   - Enable "Developer mode"
+   - Click "Load unpacked"
+   - Select the `dist-extension` folder
 
 ## Contributing
 
@@ -104,9 +108,9 @@ InstaReciprocate requires the following permissions:
 
 | Permission | Purpose |
 |------------|---------|
-| `activeTab` | Required for analyzing the current Instagram tab |
-| `scripting` | Needed for injecting analysis script |
-| `storage` | Required for storing whitelist and preferences | 
+| `activeTab` | Required for Instagram interaction |
+| `scripting` | Needed for automation script |
+| `storage` | Required for storing whitelist and settings | 
 
 ## License
 
