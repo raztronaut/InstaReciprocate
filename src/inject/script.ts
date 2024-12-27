@@ -40,7 +40,7 @@ class InstaReciprocate {
   private onboardingContainer: HTMLDivElement | null = null;
 
   constructor() {
-    this.whitelistedUsers = this.loadWhitelistedUsers();
+    this.whitelistedUsers = new Set<string>();
     // Check if onboarding is completed
     this.onboardingState.hasCompleted = localStorage.getItem(STORAGE_KEYS.ONBOARDING_COMPLETED) === 'true';
     
@@ -52,6 +52,56 @@ class InstaReciprocate {
 
     // Add cleanup on window unload
     window.addEventListener('unload', this.cleanup.bind(this));
+
+    // Initialize whitelisted users
+    this.initializeWhitelistedUsers();
+  }
+
+  private async initializeWhitelistedUsers(): Promise<void> {
+    try {
+      const whitelisted = await this.loadWhitelistedUsers();
+      this.whitelistedUsers = whitelisted;
+      this.updateResults();
+    } catch (error) {
+      console.error('Error initializing whitelisted users:', error);
+      this.whitelistedUsers = new Set<string>();
+    }
+  }
+
+  private loadWhitelistedUsers(): Set<string> {
+    try {
+      const stored = localStorage.getItem('instagram-analytics-whitelisted-users');
+      if (!stored) return new Set<string>();
+      
+      const parsed = JSON.parse(stored);
+      if (!Array.isArray(parsed)) {
+        console.error('Invalid whitelist data format');
+        return new Set<string>();
+      }
+      
+      const whitelistedUsers = new Set(parsed.filter(item => typeof item === 'string'));
+      
+      // Add placeholder data and trigger async user data fetch
+      whitelistedUsers.forEach(username => {
+        if (!this.userMap.has(username)) {
+          // Set initial placeholder
+          this.userMap.set(username, {
+            id: '',
+            username: username,
+            fullName: '',
+            profilePicUrl: ''
+          });
+
+          // Trigger async fetch without waiting
+          this.updateUserData(username);
+        }
+      });
+      
+      return whitelistedUsers;
+    } catch (error) {
+      console.error('Error loading whitelisted users:', error);
+      return new Set<string>();
+    }
   }
 
   private cleanup(): void {
@@ -67,14 +117,47 @@ class InstaReciprocate {
     }
   }
 
-  private loadWhitelistedUsers(): Set<string> {
+  private async fetchUserData(username: string): Promise<{
+    id: string;
+    username: string;
+    fullName: string;
+    profilePicUrl: string;
+  } | null> {
     try {
-      const stored = localStorage.getItem('instagram-analytics-whitelisted-users');
-      if (!stored) return new Set<string>();
-      return new Set(JSON.parse(stored));
+      const response = await fetch(`https://www.instagram.com/api/v1/users/web_profile_info/?username=${username}`, {
+        headers: {
+          'x-ig-app-id': '936619743392459',
+        },
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        console.error(`Failed to fetch user data for ${username}:`, response.status);
+        return null;
+      }
+
+      const data = await response.json();
+      const user = data.data.user;
+      
+      return {
+        id: user.id,
+        username: user.username,
+        fullName: user.full_name || '',
+        profilePicUrl: user.profile_pic_url || ''
+      };
     } catch (error) {
-      console.error('Error loading whitelisted users:', error);
-      return new Set<string>();
+      console.error(`Error fetching user data for ${username}:`, error);
+      return null;
+    }
+  }
+
+  private async updateUserData(username: string): Promise<void> {
+    if (!this.userMap.has(username) || !this.userMap.get(username)?.id) {
+      const userData = await this.fetchUserData(username);
+      if (userData) {
+        this.userMap.set(username, userData);
+        this.updateResults();
+      }
     }
   }
 
@@ -103,6 +186,41 @@ class InstaReciprocate {
     this.updateResults();
   }
 
+  private updateCheckboxState(checkbox: HTMLDivElement, username: string): void {
+    const isSelected = this.selectedUsers.has(username);
+    checkbox.style.borderColor = isSelected ? '#3b82f6' : '#d1d5db';
+    checkbox.style.backgroundColor = isSelected ? '#3b82f6' : 'transparent';
+    
+    // Update checkbox content
+    checkbox.innerHTML = isSelected ? `
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.5">
+        <path d="M2.5 6l2.5 2.5 4.5-4.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    ` : '';
+  }
+
+  private updateActionButtonsState(): void {
+    const actionButtonsContainer = document.querySelector('.action-buttons-container');
+    if (!actionButtonsContainer) return;
+
+    const buttons = actionButtonsContainer.querySelectorAll('button');
+    buttons.forEach(button => {
+      if (button.textContent?.includes('Select All')) {
+        const relevantUsers = this.activeTab === 'whitelist' 
+          ? this.allUsers.filter(user => this.whitelistedUsers.has(user))
+          : this.allUsers.filter(user => !this.whitelistedUsers.has(user) && !this.unfollowedUsers.has(user));
+        
+        button.textContent = this.selectedUsers.size === relevantUsers.length ? 'Deselect All' : 'Select All';
+        button.style.backgroundColor = this.selectedUsers.size === relevantUsers.length ? '#f3f4f6' : 'transparent';
+      } else {
+        const isDisabled = this.selectedUsers.size === 0;
+        button.style.opacity = isDisabled ? '0.5' : '1';
+        button.style.cursor = isDisabled ? 'not-allowed' : 'pointer';
+        button.disabled = isDisabled;
+      }
+    });
+  }
+
   private createUserItem(username: string): HTMLDivElement {
     const item = document.createElement('div');
     item.className = 'user-item';
@@ -124,6 +242,7 @@ class InstaReciprocate {
     // Add checkbox for selection (in non-followers and whitelist tabs)
     if (this.activeTab === 'non-followers' || this.activeTab === 'whitelist') {
       const checkbox = document.createElement('div');
+      checkbox.className = 'user-checkbox';
       checkbox.style.cssText = `
         width: 20px;
         height: 20px;
@@ -145,7 +264,10 @@ class InstaReciprocate {
         } else {
           this.selectedUsers.add(username);
         }
-        this.updateResults();
+        
+        // Only update the checkbox state and action buttons
+        this.updateCheckboxState(checkbox, username);
+        this.updateActionButtonsState();
       };
 
       if (this.selectedUsers.has(username)) {
@@ -490,7 +612,7 @@ class InstaReciprocate {
   private getActiveTabUsers(): string[] {
     switch (this.activeTab) {
       case 'whitelist':
-        return this.allUsers.filter(user => this.whitelistedUsers.has(user));
+        return Array.from(this.whitelistedUsers);
       case 'unfollowed':
         return Array.from(this.unfollowedUsers);
       default: // 'non-followers'

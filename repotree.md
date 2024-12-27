@@ -54,11 +54,11 @@ const STORAGE_KEYS = {
 #### Constructor
 ```typescript
 constructor()
-- Initializes whitelistedUsers from localStorage
+- Initializes whitelistedUsers as empty Set
 - Checks if onboarding is completed from localStorage
 - Sets up CustomEvent listener for whitelist updates
 - Sets up window unload event listener for cleanup
-- Binds cleanup method to unload event
+- Initializes whitelisted users asynchronously
 ```
 
 #### Private Methods
@@ -119,6 +119,18 @@ private createTabs(): HTMLDivElement
 - Shows count badges for each tab
 - Returns complete tab container
 
+private updateCheckboxState(checkbox: HTMLDivElement, username: string): void
+- Updates visual state of a single checkbox
+- Handles checkbox border and background color
+- Updates checkbox content (checkmark SVG)
+- Optimizes performance by avoiding full UI rebuild
+
+private updateActionButtonsState(): void
+- Updates state of action buttons container
+- Handles Select All/Deselect All button text and styling
+- Updates disabled state of action buttons
+- Optimizes performance by targeting only necessary elements
+
 private createUserItem(username: string): HTMLDivElement
 - Creates user list item with:
   - Profile picture with fallback
@@ -126,7 +138,7 @@ private createUserItem(username: string): HTMLDivElement
   - Full name if available
   - Action buttons based on tab
   - Whitelist toggle when applicable
-  - Selection checkbox when needed
+  - Selection checkbox with optimized state updates
 - Handles all user interactions
 
 private createActionButtons(): HTMLDivElement
@@ -170,34 +182,30 @@ private handleSearchInput(event: Event): void
 
 ##### Data Management
 ```typescript
+private async fetchUserData(username: string): Promise<UserData | null>
+- Fetches user profile data from Instagram API
+- Returns user ID, username, full name, and profile picture URL
+- Handles API errors and rate limiting
+- Returns null if fetch fails
+
+private async initializeWhitelistedUsers(): Promise<void>
+- Loads whitelisted users from storage
+- Updates whitelistedUsers Set
+- Updates UI with loaded data
+- Handles initialization errors
+
+private async updateUserData(username: string): Promise<void>
+- Updates user data in userMap if missing or incomplete
+- Fetches fresh data from Instagram API
+- Updates UI when new data is available
+- Handles API errors gracefully
+
 private loadWhitelistedUsers(): Set<string>
-- Loads whitelist from localStorage
-- Handles JSON parsing
-- Implements error handling
-- Returns whitelist Set
-
-private saveWhitelistedUsers(): void
-- Saves whitelist to localStorage
-- Dispatches whitelistUpdated event
-- Handles storage errors
-
-private toggleWhitelist(username: string): void
-- Toggles user whitelist status
-- Updates UI elements
-- Saves changes to storage
-- Updates button states
-
-private getFilteredUsers(): string[]
-- Filters users based on search query
-- Handles case-insensitive search
-- Searches username and full name
-- Returns filtered array
-
-private getActiveTabUsers(): string[]
-- Returns users based on active tab
-- Filters for whitelist status
-- Handles unfollowed users
-- Returns appropriate user list
+- Loads whitelisted usernames from localStorage
+- Validates stored data format
+- Creates placeholder data for each user
+- Triggers async user data fetch
+- Returns Set of whitelisted usernames
 ```
 
 ##### Analysis & Operations
