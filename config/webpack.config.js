@@ -1,7 +1,10 @@
 const path = require('path');
 
 module.exports = {
-  entry: './src/inject/script.ts',
+  entry: {
+    content: './src/inject/script.ts',
+    background: './src/background/background.js'
+  },
   mode: 'production',
   module: {
     rules: [
@@ -15,12 +18,12 @@ module.exports = {
   resolve: {
     extensions: ['.tsx', '.ts', '.js'],
     alias: {
-      '@': path.resolve(__dirname, 'src'),
+      '@': path.resolve(__dirname, '../src'),
     },
   },
   output: {
-    filename: 'insta-reciprocate.js',
-    path: path.resolve(__dirname, 'dist-extension'),
+    filename: '[name].js',
+    path: path.resolve(__dirname, '../dist-extension'),
     library: {
       name: 'InstaReciprocate',
       type: 'var',
