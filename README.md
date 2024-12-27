@@ -31,6 +31,16 @@ We take a radical approach to privacy:
 - Fresh sessions: All data is cleared when you close the extension
 - For complete details, see our [Privacy Policy](PRIVACY.md)
 
+## Required Permissions
+
+InstaReciprocate needs the following permissions to function:
+
+| Permission | Purpose |
+|------------|---------|
+| `activeTab` | Required for Instagram interaction |
+| `scripting` | Needed for automation script |
+| `storage` | Required for storing whitelist and settings | 
+
 ## Usage
 
 1. Log in to Instagram in your browser
@@ -102,15 +112,6 @@ npm run build:inject
 - [Privacy Policy](PRIVACY.md)
 - [Terms of Service](TERMS.md)
 - [Changelog](CHANGELOG.md)
-
-## Permissions
-InstaReciprocate requires the following permissions:
-
-| Permission | Purpose |
-|------------|---------|
-| `activeTab` | Required for Instagram interaction |
-| `scripting` | Needed for automation script |
-| `storage` | Required for storing whitelist and settings | 
 
 ## License
 

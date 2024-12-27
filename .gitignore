@@ -39,3 +39,23 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# build output
+/dist-extension/
+/dist/
+
+# IDE - VSCode
+.vscode/*
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/settings.json
+
+# IDE - JetBrains
+.idea/
+
+# Local development
+*.local
+*.log
+
+# System Files
+Thumbs.db
