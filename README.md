@@ -1,6 +1,11 @@
-# <img src="icons/logo.png" alt="InstaReciprocate Logo" width="32" height="32" style="vertical-align: middle"> InstaReciprocate
+<p align="center"><img width="250" alt="InstaReciprocate Logo" src="icons/icon128.png"></p>
 
-A powerful tool to analyze your Instagram following/followers relationships with advanced insights and safety features.
+<h2 align="center">InstaReciprocate</h2>
+<br/>
+<p align="center">InstaReciprocate is a <strong>powerful</strong> MIT-licensed <strong>browser extension</strong> designed to analyze Instagram relationships. It provides <strong>advanced insights</strong> into your following/followers with built-in <strong>safety features</strong> and a privacy-first approach.</p>
+<br/>
+<p align="center"><a rel="noreferrer noopener" href="https://chrome.google.com/webstore/detail/instareciprocate"><img alt="Chrome Web Store" src="https://img.shields.io/badge/Chrome-141e24.svg?&style=for-the-badge&logo=google-chrome&logoColor=white"></a></p>
+<br/>
 
 ## Chrome Web Store Installation
 
