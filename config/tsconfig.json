@@ -12,12 +12,18 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "react",
-    "baseUrl": "../",
+    "rootDir": "../src",
+    "baseUrl": "../src",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./*"]
     },
     "outDir": "../dist-extension"
   },
-  "include": ["../src/**/*.ts", "../src/**/*.tsx"],
-  "exclude": ["node_modules"]
+  "include": [
+    "../src/**/*.ts",
+    "../src/**/*.tsx",
+    "../src/**/*.js",
+    "../src/**/*.jsx"
+  ],
+  "exclude": ["../node_modules"]
 }
