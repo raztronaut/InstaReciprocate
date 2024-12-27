@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "InstaReciprocate",
-  "version": "0.9.0.1",
+  "version": "0.9.0",
   "description": "Analyze your Instagram following and followers with advanced insights. Safe, private, and feature-rich Instagram relationship analyzer.",
   "author": "InstaReciprocate",
   "homepage_url": "https://github.com/raztronaut/InstaReciprocate",
