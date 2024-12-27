@@ -31,12 +31,31 @@ private userMap: Map<string, {
 }> = new Map()
 private allUsers: string[] = []
 private unfollowedUsers: Set<string> = new Set()
+private onboardingState: {
+  currentStep: number
+  totalSteps: number
+  hasCompleted: boolean
+} = {
+  currentStep: 1,
+  totalSteps: 3,
+  hasCompleted: false
+}
+private onboardingContainer: HTMLDivElement | null = null
+```
+
+#### Constants
+```typescript
+const STORAGE_KEYS = {
+  ONBOARDING_COMPLETED: 'insta-reciprocate-onboarding-completed',
+  WHITELISTED_USERS: 'instagram-analytics-whitelisted-users'
+}
 ```
 
 #### Constructor
 ```typescript
 constructor()
 - Initializes whitelistedUsers from localStorage
+- Checks if onboarding is completed from localStorage
 - Sets up CustomEvent listener for whitelist updates
 - Sets up window unload event listener for cleanup
 - Binds cleanup method to unload event
@@ -48,17 +67,33 @@ constructor()
 ```typescript
 private createUI(): void
 - Creates modal container with blur backdrop
-- Initializes UI components:
-  - Header with logo and close button
-  - Start analysis button with gradient
-  - Progress indicator
-  - Results container
-- Sets up event handlers:
-  - ESC key for modal closing
-  - Button hover effects
-  - Close button functionality
-  - Error handling for images
-  - Backdrop click handling
+- Initializes UI components based on onboarding state
+- Sets up animations and styles
+- Handles keyboard shortcuts
+- Manages backdrop and container lifecycle
+
+private createOnboarding(): HTMLDivElement
+- Creates multi-step onboarding interface
+- Implements step navigation
+- Handles animations and transitions
+- Manages onboarding content and icons
+- Returns onboarding container element
+
+private updateOnboarding(): void
+- Updates onboarding UI when step changes
+- Handles smooth transitions between steps
+- Manages onboarding container replacement
+
+private completeOnboarding(): void
+- Marks onboarding as completed in localStorage
+- Updates onboarding state
+- Transitions to main UI
+
+private initializeMainUI(): void
+- Creates main application interface
+- Sets up header, buttons, and containers
+- Initializes analysis functionality
+- Called after onboarding completion
 
 private createLoadingSpinner(): string
 - Returns HTML string for loading spinner animation
