@@ -81,6 +81,7 @@ To ensure safe usage of Instagram's API:
 
 ### Prerequisites
 - Node.js 18+
+- npm 8+
 
 ### Local Development
 
@@ -95,9 +96,18 @@ cd instareciprocate
 npm install
 ```
 
-3. Build the extension:
+3. Available build commands:
 ```bash
-npm run build:inject
+# Development build with watch mode (for active development)
+npm run dev
+
+# Production build for local testing
+npm run build:prod
+
+# Additional commands
+npm run build:analyze  # Analyze bundle size
+npm run validate      # Run type checking and linting
+npm run format        # Format code with Prettier
 ```
 
 4. Load the extension in Chrome:
@@ -105,6 +115,30 @@ npm run build:inject
    - Enable "Developer mode"
    - Click "Load unpacked"
    - Select the `dist-extension` folder
+
+### Build Output
+The build process creates a `dist-extension` folder with:
+- `manifest.json`: Extension configuration
+- `background.js`: Service worker script
+- `content.js`: Main content script
+- `assets/`: Icons and other resources
+
+### Code Quality Tools
+- TypeScript for type safety
+- ESLint for code quality
+- Prettier for code formatting
+- Webpack for bundling and optimization
+
+### Build Modes
+1. **Development (`npm run dev`)**:
+   - Watch mode for automatic rebuilds
+   - Source maps for debugging
+   - Faster builds with development optimizations
+
+2. **Production (`npm run build:prod`)**:
+   - Optimized and minified code
+   - No source maps
+   - Full type checking and validation
 
 ## Contributing
 
