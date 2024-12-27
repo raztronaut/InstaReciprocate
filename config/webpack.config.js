@@ -2,8 +2,8 @@ const path = require('path');
 
 module.exports = {
   entry: {
-    content: './src/inject/script.ts',
-    background: './src/background/background.js'
+    content: path.resolve(__dirname, '../src/inject/script.ts'),
+    background: path.resolve(__dirname, '../src/background/background.js')
   },
   mode: 'production',
   module: {
@@ -24,14 +24,6 @@ module.exports = {
   output: {
     filename: '[name].js',
     path: path.resolve(__dirname, '../dist-extension'),
-    library: {
-      name: 'InstaReciprocate',
-      type: 'var',
-      export: 'default',
-    },
-    iife: true,
-  },
-  optimization: {
-    minimize: true,
-  },
+    clean: true
+  }
 }; 

@@ -11,11 +11,12 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "downlevelIteration": true,
+    "jsx": "react",
     "baseUrl": "../",
     "paths": {
       "@/*": ["src/*"]
-    }
+    },
+    "outDir": "../dist-extension"
   },
   "include": ["../src/**/*.ts", "../src/**/*.tsx"],
   "exclude": ["node_modules"]
