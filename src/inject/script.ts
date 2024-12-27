@@ -96,7 +96,6 @@ class InstaReciprocate {
       border-radius: 8px;
       margin: 4px 0;
       transition: all 0.2s ease;
-      cursor: pointer;
       background-color: transparent;
       border: 1px solid #e5e7eb;
     `;
@@ -175,9 +174,26 @@ class InstaReciprocate {
     const userInfoContainer = document.createElement('div');
     userInfoContainer.style.cssText = 'flex-grow: 1; min-width: 0;';
     
-    const usernameText = document.createElement('div');
-    usernameText.style.cssText = 'font-weight: 600; color: #262626; overflow: hidden; text-overflow: ellipsis; font-size: 14px;';
+    const usernameText = document.createElement('a');
+    usernameText.href = `https://instagram.com/${username}`;
+    usernameText.target = '_blank';
+    usernameText.rel = 'noopener noreferrer';
+    usernameText.style.cssText = `
+      font-weight: 600;
+      color: #262626;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-size: 14px;
+      text-decoration: none;
+      cursor: pointer;
+    `;
     usernameText.textContent = username;
+    usernameText.onmouseover = () => {
+      usernameText.style.textDecoration = 'underline';
+    };
+    usernameText.onmouseout = () => {
+      usernameText.style.textDecoration = 'none';
+    };
 
     const fullNameText = document.createElement('div');
     fullNameText.style.cssText = 'color: #737373; font-size: 14px; overflow: hidden; text-overflow: ellipsis; margin-top: 1px;';
