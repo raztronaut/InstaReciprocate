@@ -1,6 +1,6 @@
 # Terms of Service
 
-Last Updated: [Current Date]
+Last Updated: December 27, 2024
 
 ## 1. Acceptance of Terms
 By installing and using InstaReciprocate ("the extension"), you agree to these Terms of Service. If you disagree with any part of these terms, you must not use the extension.

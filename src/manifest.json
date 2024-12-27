@@ -5,6 +5,7 @@
   "description": "Analyze your Instagram following and followers with advanced insights. Safe, private, and feature-rich Instagram relationship analyzer.",
   "author": "InstaReciprocate",
   "homepage_url": "https://github.com/raztronaut/InstaReciprocate",
+  "update_url": "https://clients2.google.com/service/update2/crx",
   "permissions": [
     "activeTab",
     "scripting",
