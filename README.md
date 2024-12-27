@@ -20,9 +20,11 @@ A powerful tool to analyze your Instagram following/followers relationships with
 
 ## Privacy & Security
 
-- All data is processed locally in your browser
-- No data is transmitted to external servers
-- Your Instagram credentials are never stored
+We take a radical approach to privacy:
+- Zero external storage: We don't store anything on servers
+- Local whitelist: Your whitelisted users are saved in your browser's localStorage only
+- No tracking: We don't monitor or analyze your usage
+- Fresh sessions: All analysis data is cleared when you close the extension
 - For complete details, see our [Privacy Policy](PRIVACY.md)
 
 ## Usage
@@ -43,6 +45,15 @@ A powerful tool to analyze your Instagram following/followers relationships with
 - Automatic pause on rate limit detection
 - Progress tracking and resumable operations
 - Whitelist system for protecting important follows
+
+### Rate Limits
+To ensure safe and responsible usage of Instagram's API:
+- Random delays between requests (1-3 seconds)
+- Maximum 200 requests per hour
+- Automatic 1-hour cooldown if rate limit is reached
+- Smart retry mechanism with exponential backoff
+- Visual indicators for rate limit status
+- Automatic session pause when approaching limits
 
 ## For Developers
 
@@ -83,6 +94,16 @@ npm run dev
 - [Terms of Service](TERMS.md)
 - [Changelog](CHANGELOG.md)
 
+## Permissions
+InstaReciprocate requires the following permissions:
+
+| Permission | Purpose |
+|------------|---------|
+| `activeTab` | Required for analyzing the current Instagram tab |
+| `scripting` | Needed for injecting analysis script |
+| `storage` | Required for storing whitelist and preferences | 
+
 ## License
 
 MIT License - see [LICENSE](LICENSE) file for details 
+

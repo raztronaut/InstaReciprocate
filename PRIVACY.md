@@ -3,44 +3,54 @@
 Last Updated: [Current Date]
 
 ## Introduction
-InstaReciprocate ("we", "our", or "the extension") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, and safeguard your information when you use our Chrome extension.
+InstaReciprocate is designed with your privacy as our top priority. We believe in complete transparency: we don't store, collect, or transmit any of your data. Period.
 
-## Information Collection
-### Data We Collect
-- Instagram following/followers data that is visible to your account
-- User preferences and settings within the extension
-- Extension usage statistics
+## Local Storage Usage
+We use your browser's localStorage to store only one thing:
+- Whitelist: A list of usernames you've marked as important to prevent accidental unfollowing
+- This data stays in your browser and is never transmitted anywhere
+- You can clear it anytime by clearing your browser data
 
-### Data We DO NOT Collect
-- Passwords or login credentials
-- Private messages or direct communications
-- Personal information beyond what is publicly available on Instagram
-- Browsing history outside of Instagram
+## Zero External Storage Policy
+We're proud to say: we store nothing on our servers! Here's what this means for you:
+- No servers: We don't have any - everything happens right in your browser
+- No databases: Your data exists only in your browser
+- No tracking: We don't monitor or track your usage
+- No cookies: We don't create or store any cookies
+- No analytics: We don't measure or analyze your behavior
 
-## Data Usage
-We use collected data solely for:
-- Analyzing your Instagram following/followers relationships
-- Providing insights about your account connections
-- Saving your preferences and settings
+## How It Works
+1. When you use InstaReciprocate, it temporarily processes Instagram data in your browser's memory
+2. Only your whitelist is preserved between sessions (in your browser's localStorage)
+3. Everything else is cleared when you close the extension
 
-## Data Storage
-- All data is stored locally in your browser
-- No data is transmitted to external servers
-- Your information remains on your device
+## What We DON'T Do
+We're very clear about this: we don't:
+- Store any data on external servers
+- Track your usage
+- Collect analytics
+- Use cookies
+- Share anything with third parties
+- Keep logs
+- Store any preferences (except your whitelist)
 
-## Data Security
-- We implement industry-standard security measures
-- Data is processed locally to ensure privacy
-- No third-party access to your information
+## Instagram API Usage
+- We only process data during active analysis
+- All Instagram API calls are made directly from your browser
+- No data passes through any intermediary servers
 
-## Third-Party Services
-The extension does not integrate with any third-party services except Instagram's public API endpoints.
+## Rate Limiting
+To protect both users and Instagram's services:
+- Rate limits are managed in real-time
+- No rate limit data is stored between sessions
+- All protections happen in your browser memory
 
-## User Rights
-You have the right to:
-- Clear all stored data through Chrome's extension settings
-- Disable or uninstall the extension at any time
-- Access all locally stored data
+## Your Privacy Rights
+Since we don't store any data, you don't need to worry about:
+- Data deletion requests
+- Data access requests
+- Data portability
+- Privacy settings
 
 ## Changes to Privacy Policy
 We may update this Privacy Policy periodically. Users will be notified of any significant changes.
