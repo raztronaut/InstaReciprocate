@@ -1,3 +1,8 @@
+const STORAGE_KEYS = {
+  ONBOARDING_COMPLETED: 'insta-reciprocate-onboarding-completed',
+  WHITELISTED_USERS: 'instagram-analytics-whitelisted-users'
+};
+
 class InstaReciprocate {
   private container: HTMLDivElement | null = null;
   private startButton: HTMLButtonElement | null = null;
@@ -23,9 +28,22 @@ class InstaReciprocate {
   }> = new Map();
   private allUsers: string[] = [];
   private unfollowedUsers: Set<string> = new Set();
+  private onboardingState: {
+    currentStep: number;
+    totalSteps: number;
+    hasCompleted: boolean;
+  } = {
+    currentStep: 1,
+    totalSteps: 3,
+    hasCompleted: false
+  };
+  private onboardingContainer: HTMLDivElement | null = null;
 
   constructor() {
     this.whitelistedUsers = this.loadWhitelistedUsers();
+    // Check if onboarding is completed
+    this.onboardingState.hasCompleted = localStorage.getItem(STORAGE_KEYS.ONBOARDING_COMPLETED) === 'true';
+    
     // Listen for whitelist updates from other parts of the app
     window.addEventListener('whitelistUpdated', ((event: CustomEvent) => {
       this.whitelistedUsers = new Set(event.detail.users);
@@ -748,6 +766,7 @@ class InstaReciprocate {
   private createUI() {
     // Create backdrop with blur
     const backdrop = document.createElement('div');
+    backdrop.className = 'insta-reciprocate-backdrop';
     backdrop.style.cssText = `
       position: fixed;
       top: 0;
@@ -781,7 +800,7 @@ class InstaReciprocate {
       scrollbar-color: #d1d5db transparent;
     `;
 
-    // Add webkit scrollbar styles for the main container
+    // Add webkit scrollbar styles and animations
     const style = document.createElement('style');
     style.textContent = `
       #insta-reciprocate-root::-webkit-scrollbar {
@@ -807,156 +826,60 @@ class InstaReciprocate {
       @keyframes spin {
         to { transform: rotate(360deg); }
       }
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      @keyframes scaleIn {
+        from { transform: scale(0.95); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+      }
+      @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+      }
+      @keyframes dotPulse {
+        0% { transform: scale(1); opacity: 0.6; }
+        50% { transform: scale(1.2); opacity: 1; }
+        100% { transform: scale(1); opacity: 0.6; }
+      }
+      .onboarding-content {
+        animation: fadeIn 0.6s ease-out;
+      }
+      .onboarding-icon {
+        animation: scaleIn 0.6s ease-out;
+      }
+      .get-started-btn {
+        animation: pulse 2s infinite;
+      }
+      .active-dot {
+        animation: dotPulse 2s infinite;
+      }
     `;
     document.head.appendChild(style);
 
-    // Create header with close button
-    const header = document.createElement('div');
-    header.style.cssText = `
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 32px;
-      padding-bottom: 16px;
-      border-bottom: 1px solid #dbdbdb;
-    `;
-
-    // Create title with Instagram icon
-    const titleContainer = document.createElement('div');
-    titleContainer.style.cssText = `
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    `;
-
-    const icon = document.createElement('img');
-    icon.src = chrome.runtime.getURL('assets/icons/logo.jpg');
-    icon.alt = 'InstaReciprocate Logo';
-    icon.style.cssText = `
-      width: 24px;
-      height: 24px;
-      object-fit: contain;
-    `;
-
-    const title = document.createElement('h1');
-    title.textContent = 'InstaReciprocate';
-    title.style.cssText = `
-      font-size: 20px;
-      font-weight: 600;
-      margin: 0;
-      color: #262626;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    `;
-    title.prepend(icon);
-
-    titleContainer.appendChild(icon);
-    titleContainer.appendChild(title);
-
-    // Create close button
-    const closeButton = document.createElement('button');
-    closeButton.innerHTML = '✕';
-    closeButton.style.cssText = `
-      background: none;
-      border: none;
-      font-size: 20px;
-      color: #8e8e8e;
-      cursor: pointer;
-      padding: 8px;
-      margin: -8px;
-      border-radius: 50%;
-      width: 32px;
-      height: 32px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s ease;
-    `;
-    closeButton.onmouseover = () => {
-      closeButton.style.backgroundColor = '#f3f4f6';
-      closeButton.style.color = '#262626';
-    };
-    closeButton.onmouseout = () => {
-      closeButton.style.backgroundColor = 'transparent';
-      closeButton.style.color = '#8e8e8e';
-    };
-    closeButton.onclick = () => {
-      this.cleanup();
-      document.body.removeChild(backdrop);
-      document.body.removeChild(this.container!);
-    };
-
-    header.appendChild(titleContainer);
-    header.appendChild(closeButton);
-
-    // Create button with gradient
-    this.startButton = document.createElement('button');
-    this.startButton.textContent = 'Start Analysis';
-    this.startButton.style.cssText = `
-      background: linear-gradient(45deg, #405DE6, #5B51D8, #833AB4, #C13584, #E1306C, #FD1D1D);
-      background-size: 400% 400%;
-      animation: gradient 15s ease infinite;
-      color: white;
-      border: none;
-      padding: 16px 24px;
-      border-radius: 14px;
-      cursor: pointer;
-      font-weight: 600;
-      font-size: 16px;
-      width: 100%;
-      transition: all 0.3s ease;
-      position: relative;
-      overflow: hidden;
-    `;
-
-    this.startButton.onmouseover = () => {
-      this.startButton!.style.transform = 'translateY(-2px)';
-      this.startButton!.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.2)';
-    };
-    this.startButton.onmouseout = () => {
-      this.startButton!.style.transform = 'translateY(0)';
-      this.startButton!.style.boxShadow = 'none';
-    };
-
-    // Create progress
-    this.progress = document.createElement('div');
-    this.progress.style.cssText = `
-      margin-top: 24px;
-      padding: 20px;
-      background: #f3f4f6;
-      border-radius: 14px;
-      display: none;
-      font-size: 14px;
-      color: #262626;
-      text-align: center;
-    `;
-
-    // Create results
-    this.results = document.createElement('div');
-    this.results.style.cssText = 'margin-top: 24px;';
-
-    // Add elements to container
-    this.container.appendChild(header);
-    this.container.appendChild(this.startButton);
-    this.container.appendChild(this.progress);
-    this.container.appendChild(this.results);
+    // Initialize either onboarding or main UI based on state
+    if (!this.onboardingState.hasCompleted) {
+      this.onboardingContainer = this.createOnboarding();
+      this.container.appendChild(this.onboardingContainer);
+    } else {
+      this.initializeMainUI();
+    }
 
     // Add backdrop and container to body
     document.body.appendChild(backdrop);
     document.body.appendChild(this.container);
 
-    // Add keyboard shortcut for closing with cleanup
+    // Add keyboard shortcut for closing
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && this.container && document.body.contains(this.container)) {
         this.cleanup();
-        document.body.removeChild(backdrop);
+        const backdrop = document.querySelector('.insta-reciprocate-backdrop');
+        if (backdrop) document.body.removeChild(backdrop);
         document.body.removeChild(this.container);
       }
     });
-
-    // Add click handler
-    this.startButton.addEventListener('click', () => this.analyze());
   }
 
   private createLoadingSpinner() {
@@ -1526,6 +1449,417 @@ class InstaReciprocate {
     }
 
     return container;
+  }
+
+  private createOnboarding(): HTMLDivElement {
+    const container = document.createElement('div');
+    container.style.cssText = `
+      padding: 32px;
+      text-align: center;
+      max-width: 480px;
+      margin: 0 auto;
+      position: relative;
+      overflow: hidden;
+    `;
+
+    const steps = [
+      {
+        title: 'Welcome to InstaReciprocate',
+        description: 'Analyze your Instagram following and find out who\'s not following you back.',
+        icon: chrome.runtime.getURL('assets/icons/icon128.png'),
+        isLogo: true
+      },
+      {
+        title: 'Key Features',
+        description: 'Find non-followers, protect important accounts with whitelist, and safely manage your following.',
+        icon: chrome.runtime.getURL('assets/icons/HeartHandsEmoji.png'),
+        isLogo: false
+      },
+      {
+        title: 'Safe & Secure',
+        description: 'We follow Instagram\'s rate limits and protect your data. No information is stored on external servers.',
+        icon: chrome.runtime.getURL('assets/icons/sparkles.png'),
+        isLogo: false
+      }
+    ];
+
+    const currentStep = steps[this.onboardingState.currentStep - 1];
+
+    // Create step indicator with enhanced styling
+    const stepIndicator = document.createElement('div');
+    stepIndicator.style.cssText = `
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 32px;
+    `;
+
+    for (let i = 1; i <= this.onboardingState.totalSteps; i++) {
+      const dot = document.createElement('div');
+      const isActive = i === this.onboardingState.currentStep;
+      dot.style.cssText = `
+        width: ${isActive ? '10px' : '8px'};
+        height: ${isActive ? '10px' : '8px'};
+        border-radius: 50%;
+        background-color: ${isActive ? '#0095f6' : '#dbdbdb'};
+        transition: all 0.3s ease;
+        ${isActive ? 'class: active-dot;' : ''}
+      `;
+      stepIndicator.appendChild(dot);
+    }
+
+    // Create content container with animation
+    const contentContainer = document.createElement('div');
+    contentContainer.className = 'onboarding-content';
+    contentContainer.style.cssText = `
+      opacity: 0;
+      transform: translateY(10px);
+    `;
+
+    // Create icon with enhanced styling
+    const icon = document.createElement('img');
+    icon.src = currentStep.icon;
+    icon.alt = currentStep.title;
+    icon.className = 'onboarding-icon';
+    icon.style.cssText = `
+      width: 88px;
+      height: 88px;
+      margin-bottom: 28px;
+      border-radius: ${currentStep.isLogo ? '20px' : '50%'};
+      background-color: white;
+      object-fit: contain;
+      padding: ${currentStep.isLogo ? '0' : '16px'};
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+      opacity: 0;
+      transform: scale(0.95);
+      transition: all 0.3s ease;
+    `;
+
+    icon.onmouseover = () => {
+      icon.style.transform = 'scale(1.05)';
+      icon.style.boxShadow = '0 12px 32px rgba(0, 0, 0, 0.12)';
+    };
+
+    icon.onmouseout = () => {
+      icon.style.transform = 'scale(1)';
+      icon.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.08)';
+    };
+
+    // Create title with enhanced styling
+    const title = document.createElement('h2');
+    title.textContent = currentStep.title;
+    title.style.cssText = `
+      font-size: 28px;
+      font-weight: 700;
+      color: #262626;
+      margin-bottom: 16px;
+      letter-spacing: -0.5px;
+    `;
+
+    // Create description with enhanced styling
+    const description = document.createElement('p');
+    description.textContent = currentStep.description;
+    description.style.cssText = `
+      font-size: 16px;
+      color: #737373;
+      margin-bottom: 32px;
+      line-height: 1.6;
+      max-width: 400px;
+      margin-left: auto;
+      margin-right: auto;
+    `;
+
+    // Create navigation buttons with enhanced styling
+    const buttonContainer = document.createElement('div');
+    buttonContainer.style.cssText = `
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin-top: 32px;
+    `;
+
+    if (this.onboardingState.currentStep > 1) {
+      const backButton = document.createElement('button');
+      backButton.textContent = 'Back';
+      backButton.style.cssText = `
+        padding: 14px 28px;
+        border-radius: 12px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        background: none;
+        border: 1.5px solid #dbdbdb;
+        color: #262626;
+      `;
+      
+      backButton.onmouseover = () => {
+        backButton.style.backgroundColor = '#f3f4f6';
+        backButton.style.borderColor = '#c0c0c0';
+      };
+      
+      backButton.onmouseout = () => {
+        backButton.style.backgroundColor = 'transparent';
+        backButton.style.borderColor = '#dbdbdb';
+      };
+      
+      backButton.onclick = () => {
+        this.onboardingState.currentStep--;
+        this.updateOnboarding();
+      };
+      
+      buttonContainer.appendChild(backButton);
+    }
+
+    const nextButton = document.createElement('button');
+    nextButton.textContent = this.onboardingState.currentStep === this.onboardingState.totalSteps ? 'Get Started' : 'Next';
+    nextButton.className = this.onboardingState.currentStep === this.onboardingState.totalSteps ? 'get-started-btn' : '';
+    nextButton.style.cssText = `
+      padding: 14px 32px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: #0095f6;
+      border: none;
+      color: white;
+      box-shadow: 0 4px 12px rgba(0, 149, 246, 0.2);
+    `;
+    
+    nextButton.onmouseover = () => {
+      nextButton.style.backgroundColor = '#1aa1f7';
+      nextButton.style.transform = 'translateY(-1px)';
+      nextButton.style.boxShadow = '0 6px 16px rgba(0, 149, 246, 0.25)';
+    };
+    
+    nextButton.onmouseout = () => {
+      nextButton.style.backgroundColor = '#0095f6';
+      nextButton.style.transform = 'translateY(0)';
+      nextButton.style.boxShadow = '0 4px 12px rgba(0, 149, 246, 0.2)';
+    };
+    
+    nextButton.onclick = () => {
+      if (this.onboardingState.currentStep === this.onboardingState.totalSteps) {
+        this.completeOnboarding();
+      } else {
+        this.onboardingState.currentStep++;
+        this.updateOnboarding();
+      }
+    };
+    
+    buttonContainer.appendChild(nextButton);
+
+    // Add skip button with enhanced styling
+    if (this.onboardingState.currentStep < this.onboardingState.totalSteps) {
+      const skipButton = document.createElement('button');
+      skipButton.textContent = 'Skip';
+      skipButton.style.cssText = `
+        position: absolute;
+        top: 32px;
+        right: 32px;
+        background: none;
+        border: none;
+        font-size: 14px;
+        color: #8e8e8e;
+        cursor: pointer;
+        padding: 8px 16px;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+      `;
+      
+      skipButton.onmouseover = () => {
+        skipButton.style.color = '#262626';
+        skipButton.style.backgroundColor = '#f3f4f6';
+      };
+      
+      skipButton.onmouseout = () => {
+        skipButton.style.color = '#8e8e8e';
+        skipButton.style.backgroundColor = 'transparent';
+      };
+      
+      skipButton.onclick = () => {
+        this.completeOnboarding();
+      };
+      
+      container.appendChild(skipButton);
+    }
+
+    contentContainer.appendChild(stepIndicator);
+    contentContainer.appendChild(icon);
+    contentContainer.appendChild(title);
+    contentContainer.appendChild(description);
+    contentContainer.appendChild(buttonContainer);
+    container.appendChild(contentContainer);
+
+    // Trigger animations after a short delay
+    setTimeout(() => {
+      contentContainer.style.opacity = '1';
+      contentContainer.style.transform = 'translateY(0)';
+      icon.style.opacity = '1';
+      icon.style.transform = 'scale(1)';
+    }, 50);
+
+    return container;
+  }
+
+  private updateOnboarding(): void {
+    if (this.onboardingContainer && this.container) {
+      const newOnboarding = this.createOnboarding();
+      this.onboardingContainer.replaceWith(newOnboarding);
+      this.onboardingContainer = newOnboarding;
+    }
+  }
+
+  private completeOnboarding(): void {
+    // Always mark as completed after first viewing
+    localStorage.setItem(STORAGE_KEYS.ONBOARDING_COMPLETED, 'true');
+    
+    this.onboardingState.hasCompleted = true;
+    if (this.container) {
+      this.container.innerHTML = '';
+      this.initializeMainUI();
+    }
+  }
+
+  private initializeMainUI(): void {
+    if (!this.container) return;
+
+    // Create header with close button
+    const header = document.createElement('div');
+    header.style.cssText = `
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 32px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #dbdbdb;
+    `;
+
+    // Create title with Instagram icon
+    const titleContainer = document.createElement('div');
+    titleContainer.style.cssText = `
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    `;
+
+    const icon = document.createElement('img');
+    icon.src = chrome.runtime.getURL('assets/icons/logo.jpg');
+    icon.alt = 'InstaReciprocate Logo';
+    icon.style.cssText = `
+      width: 24px;
+      height: 24px;
+      object-fit: contain;
+    `;
+
+    const title = document.createElement('h1');
+    title.textContent = 'InstaReciprocate';
+    title.style.cssText = `
+      font-size: 20px;
+      font-weight: 600;
+      margin: 0;
+      color: #262626;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    `;
+    title.prepend(icon);
+
+    titleContainer.appendChild(icon);
+    titleContainer.appendChild(title);
+
+    // Create close button
+    const closeButton = document.createElement('button');
+    closeButton.innerHTML = '✕';
+    closeButton.style.cssText = `
+      background: none;
+      border: none;
+      font-size: 20px;
+      color: #8e8e8e;
+      cursor: pointer;
+      padding: 8px;
+      margin: -8px;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    `;
+    closeButton.onmouseover = () => {
+      closeButton.style.backgroundColor = '#f3f4f6';
+      closeButton.style.color = '#262626';
+    };
+    closeButton.onmouseout = () => {
+      closeButton.style.backgroundColor = 'transparent';
+      closeButton.style.color = '#8e8e8e';
+    };
+    closeButton.onclick = () => {
+      this.cleanup();
+      const backdrop = document.querySelector('.insta-reciprocate-backdrop');
+      if (backdrop) document.body.removeChild(backdrop);
+      document.body.removeChild(this.container!);
+    };
+
+    header.appendChild(titleContainer);
+    header.appendChild(closeButton);
+
+    // Create button with gradient
+    this.startButton = document.createElement('button');
+    this.startButton.textContent = 'Start Analysis';
+    this.startButton.style.cssText = `
+      background: linear-gradient(45deg, #405DE6, #5B51D8, #833AB4, #C13584, #E1306C, #FD1D1D);
+      background-size: 400% 400%;
+      animation: gradient 15s ease infinite;
+      color: white;
+      border: none;
+      padding: 16px 24px;
+      border-radius: 14px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 16px;
+      width: 100%;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    `;
+
+    this.startButton.onmouseover = () => {
+      this.startButton!.style.transform = 'translateY(-2px)';
+      this.startButton!.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.2)';
+    };
+    this.startButton.onmouseout = () => {
+      this.startButton!.style.transform = 'translateY(0)';
+      this.startButton!.style.boxShadow = 'none';
+    };
+
+    // Create progress
+    this.progress = document.createElement('div');
+    this.progress.style.cssText = `
+      margin-top: 24px;
+      padding: 20px;
+      background: #f3f4f6;
+      border-radius: 14px;
+      display: none;
+      font-size: 14px;
+      color: #262626;
+      text-align: center;
+    `;
+
+    // Create results
+    this.results = document.createElement('div');
+    this.results.style.cssText = 'margin-top: 24px;';
+
+    // Add elements to container
+    this.container.appendChild(header);
+    this.container.appendChild(this.startButton);
+    this.container.appendChild(this.progress);
+    this.container.appendChild(this.results);
+
+    // Add click handler
+    this.startButton.addEventListener('click', () => this.analyze());
   }
 
   public init() {
