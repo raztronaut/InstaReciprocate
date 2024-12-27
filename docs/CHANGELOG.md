@@ -2,37 +2,34 @@
 
 All notable changes to InstaReciprocate will be documented in this file.
 
-## [1.0.0] - 2024-03-20
+## [0.9.0-beta.1] - 2023-12-27
+
+Initial beta release for testing and Chrome Web Store review.
+
 ### Added
-- Initial release of InstaReciprocate
-- Instagram following/followers analysis functionality
-- Real-time progress tracking
-- Search and filtering capabilities
+- Basic Instagram relationship analysis
+- Safe and rate-limited data fetching
 - Whitelist system for protecting important follows
-- Rate limiting and safety features
+- Search and filtering capabilities
 - Modern UI with responsive design
-- Local storage for user preferences
+- Privacy-first approach with local storage only
+- Rate limiting and safety features
+  - Random delays between actions
+  - Automatic cooldown periods
+  - Progress tracking
+  - Visual indicators
 
-### Security
-- Implemented rate limiting with random delays
-- Added automatic pause on rate limit detection
-- Created whitelist system for protecting important follows
+### Safety Features
+- Intelligent rate limiting
+- Random delays between actions (1-3 seconds)
+- Maximum 200 actions per hour
+- Automatic pause on rate limit detection
+- Progress tracking
+- Whitelist system for protecting important accounts
 
-## [0.9.0] - 2024-03-15
-### Added
-- Beta testing phase
-- Core functionality implementation
-- Basic UI components
-- Instagram API integration
-
-### Fixed
-- Rate limiting issues
-- Data fetching reliability
-- UI responsiveness
-
-## [0.8.0] - 2024-03-10
-### Added
-- Alpha testing phase
-- Initial codebase setup
-- Basic extension structure
-- Development environment configuration 
+### Notes
+- This is a beta release for testing purposes
+- Limited to basic functionality for initial review
+- Focus on safety and user privacy
+- All data processing happens locally
+- No external data storage or tracking 
