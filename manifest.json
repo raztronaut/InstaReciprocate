@@ -2,14 +2,13 @@
   "manifest_version": 3,
   "name": "InstaReciprocate",
   "version": "0.9.0",
-  "description": "Analyze your Instagram following and followers with advanced insights. Safe, private, and feature-rich Instagram relationship analyzer.",
+  "description": "Analyze Instagram following & followers with advanced insights. Safe, private tool to understand your Instagram relationships.",
   "author": "InstaReciprocate",
   "homepage_url": "https://github.com/raztronaut/InstaReciprocate",
   "update_url": "https://clients2.google.com/service/update2/crx",
   "permissions": [
     "activeTab",
-    "scripting",
-    "storage"
+    "scripting"
   ],
   "host_permissions": [
     "https://www.instagram.com/*"
