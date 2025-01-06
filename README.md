@@ -9,7 +9,7 @@
 
 ## Chrome Web Store Installation
 
-1. Visit the [InstaReciprocate Chrome Web Store page](https://chrome.google.com/webstore/detail/instareciprocate)
+1. Visit the [InstaReciprocate Chrome Web Store page](https://chromewebstore.google.com/detail/InstaReciprocate/mnboeolamdcoiblgmlihanjklobhdbdf?hl=en&authuser=0)
 2. Click the "Add to Chrome" button
 3. Click "Add extension" in the confirmation popup
 4. The extension icon will appear in your Chrome toolbar
