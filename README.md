@@ -5,6 +5,7 @@
 <p align="center">InstaReciprocate is a <strong>powerful</strong> MIT-licensed <strong>browser extension</strong> designed to analyze Instagram relationships. It provides <strong>advanced insights</strong> into your following/followers with built-in <strong>safety features</strong> and a privacy-first approach.</p>
 <br/>
 <p align="center"><a rel="noreferrer noopener" href="https://chrome.google.com/webstore/detail/instareciprocate"><img alt="Chrome Web Store" src="https://img.shields.io/badge/Chrome-141e24.svg?&style=for-the-badge&logo=google-chrome&logoColor=white"></a></p>
+<p align="center"><a href="https://www.producthunt.com/posts/instareciprocate?embed=true&utm_source=badge-featured&utm_medium=badge&utm_souce=badge-instareciprocate" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=765196&theme=dark" alt="InstaReciprocate - Analyze&#0032;your&#0032;IG&#0032;following&#0047;followers&#0032;and&#0032;see&#0032;who&#0032;hates&#0032;you&#0046; | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a></p>
 <br/>
 
 ## Chrome Web Store Installation
